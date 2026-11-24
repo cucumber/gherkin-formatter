@@ -79,6 +79,7 @@ final class DataTableFormatter {
         return builder.toString();
     }
 
+    @SuppressWarnings("UnnecessaryParentheses")
     private int cellLength(String rendered) {
         return rendered.codePoints() //
                 .map(codepoint ->

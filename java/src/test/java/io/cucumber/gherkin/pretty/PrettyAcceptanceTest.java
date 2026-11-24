@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PrettyAcceptanceTest {
 
-
     @Nested
     class GherkinUtils {
         private static final GherkinParser parser = GherkinParser.builder()
@@ -82,7 +81,6 @@ class PrettyAcceptanceTest {
     @Nested
     class CompatibilityKit {
 
-
         private static final NdjsonToMessageReader.Deserializer deserializer = Json.instance()
                 .map(json -> json.deserializer(Envelope.class))
                 .orElseThrow()::readValue;
@@ -128,9 +126,6 @@ class PrettyAcceptanceTest {
             return result;
         }
 
-        record Documents(Source source, GherkinDocument gherkinDocument) {
-
-        }
 
         private static Documents findSourceAndGherkinDocument(Path path) {
             Source source = null;
@@ -157,6 +152,9 @@ class PrettyAcceptanceTest {
             throw new IllegalStateException("Could not find source and gherkin document in " + path);
         }
 
+        record Documents(Source source, GherkinDocument gherkinDocument) {
+
+        }
     }
 
     static class TestCase {

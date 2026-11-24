@@ -1,6 +1,5 @@
 package io.cucumber.gherkin.pretty;
 
-import io.cucumber.gherkin.pretty.GherkinDocumentWalker.Description;
 import io.cucumber.messages.types.Background;
 import io.cucumber.messages.types.Comment;
 import io.cucumber.messages.types.DataTable;
@@ -28,7 +27,7 @@ public final class Pretty {
         return pretty.toString();
     }
 
-    private static class PrettyHandler implements GherkinDocumentWalker.Handler {
+    private static final class PrettyHandler implements Handler {
 
         private static final String INDENT = "  ";
 
@@ -147,7 +146,7 @@ public final class Pretty {
         }
 
         @Override
-        public void handle(int level, GherkinDocumentWalker.TagLine tags) {
+        public void handle(int level, TagLine tags) {
             writeLine(level, tags.tags().stream().map(Tag::getName).collect(Collectors.joining(" ")));
         }
 

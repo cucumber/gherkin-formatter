@@ -15,6 +15,7 @@ Feature:
     Background:
 
     Example:
+
       This line and the following 3 lines are part of a description
       Given
       When

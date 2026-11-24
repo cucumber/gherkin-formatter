@@ -57,11 +57,6 @@ public final class Pretty {
         }
 
         @Override
-        public void start(int level, GherkinDocumentWalker.Description description) {
-            ensureSpacing();
-        }
-
-        @Override
         public void handle(int level, GherkinDocumentWalker.Description description) {
             description.body().stripTrailing().stripIndent().lines()
                     .map(String::stripTrailing)
@@ -112,8 +107,15 @@ public final class Pretty {
         public void handle(int level, DocString docString) {
             writeLine(level, formatDocStringCommentOpen(docString));
             docString.getContent()
-                    .lines().forEach(line -> writeLine(level, line));
+                    .lines()
+                    .map(this::formatDocStringLine)
+                    .forEach(line -> writeLine(level, line));
             writeLine(level, formatDocStringCommentClose(docString));
+        }
+
+        private String formatDocStringLine(String docStringLine) {
+            // TODO: Handle escapes
+            return docStringLine;
         }
 
         @Override

@@ -45,6 +45,24 @@ class GherkinDocumentWalker {
         default void start(int level, Examples scenario) {
         }
 
+        default void finish(int level, Feature feature) {
+        }
+
+        default void finish(int level, Description description) {
+        }
+
+        default void finish(int level, Rule rule) {
+        }
+
+        default void finish(int level, Background background) {
+        }
+
+        default void finish(int level, Scenario scenario) {
+        }
+
+        default void finish(int level, Examples scenario) {
+        }
+
         default void handle(int level, Feature rule) {
         }
 
@@ -117,11 +135,18 @@ class GherkinDocumentWalker {
         handler.handle(level, feature);
         walkDescription(level, feature.getDescription(), handler);
         walkFeatureChildren(level, feature, remainingComments, handler);
+        handler.finish(level, feature);
     }
 
     private void walkDescription(int level, String description, Handler handler) {
-        handler.start(level + 1, new Description(description));
-        handler.handle(level + 1, new Description(description));
+        if (description.isBlank()) {
+            return;
+        }
+
+        var wrapper = new Description(description);
+        handler.start(level + 1, wrapper);
+        handler.handle(level + 1, wrapper);
+        handler.finish(level, wrapper);
     }
 
     private void walkFeatureTags(int level, Feature feature, List<Comment> remainingComments, Handler handler) {
@@ -139,16 +164,19 @@ class GherkinDocumentWalker {
             handler.handle(level, rule);
             walkDescription(level, rule.getDescription(), handler);
             walkRuleChildren(level, rule, remainingComments, handler);
+            handler.finish(level, rule);
         });
 
         child.getBackground().ifPresent(background -> {
             handler.start(level, background);
             walkBackground(level, background, remainingComments, handler);
+            handler.finish(level, background);
         });
 
         child.getScenario().ifPresent(scenario -> {
             handler.start(level, scenario);
             walkScenario(level, scenario, remainingComments, handler);
+            handler.finish(level, scenario);
         });
     }
 
@@ -172,6 +200,7 @@ class GherkinDocumentWalker {
         handler.handle(level, background);
         walkDescription(level, background.getDescription(), handler);
         walkSteps(level, background, remainingComments, handler);
+        handler.finish(level, background);
     }
 
     private void walkScenario(int level, Scenario scenario, List<Comment> remainingComments, Handler handler) {
@@ -182,6 +211,7 @@ class GherkinDocumentWalker {
         walkDescription(level, scenario.getDescription(), handler);
         walkSteps(level, scenario, remainingComments, handler);
         walkExamples(level, scenario, remainingComments, handler);
+        handler.finish(level, scenario);
     }
 
     private void walkScenarioTags(int level, Scenario scenario, List<Comment> remainingComments, Handler handler) {
@@ -239,7 +269,7 @@ class GherkinDocumentWalker {
     }
 
     private void walkExamples(int level, Scenario scenario, List<Comment> remainingComments, Handler handler) {
-        scenario.getExamples().forEach(examples -> walkExamples(level, examples, remainingComments, handler));
+        scenario.getExamples().forEach(examples -> walkExamples(level + 1, examples, remainingComments, handler));
     }
 
     private void walkExamples(int level, Examples examples, List<Comment> remainingComments, Handler handler) {
@@ -250,6 +280,7 @@ class GherkinDocumentWalker {
         walkDescription(level, examples.getDescription(), handler);
         examples.getTableHeader().ifPresent(tableRow -> walkExampleTableRow(level + 1, tableRow, remainingComments, handler));
         examples.getTableBody().forEach(tableRow -> walkExampleTableRow(level + 1, tableRow, remainingComments, handler));
+        handler.finish(level, examples);
     }
 
     private void walkExamplesTags(int level, Examples examples, List<Comment> remainingComments, Handler handler) {

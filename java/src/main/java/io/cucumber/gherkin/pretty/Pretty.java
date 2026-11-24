@@ -45,7 +45,6 @@ public final class Pretty {
         public void handle(int level, Feature feature) {
             handleLanguage(level, feature);
             writeLine(level, formatTitle(feature.getKeyword(), feature.getName()));
-            ensureSpacing();
         }
 
         private void handleLanguage(int level, Feature feature) {
@@ -58,12 +57,21 @@ public final class Pretty {
         }
 
         @Override
+        public void start(int level, GherkinDocumentWalker.Description description) {
+            ensureSpacing();
+        }
+
+        @Override
         public void handle(int level, GherkinDocumentWalker.Description description) {
             description.body().stripTrailing().stripIndent().lines()
                     .map(String::stripTrailing)
                     .forEach(s -> writeLine(level, s));
         }
 
+        @Override
+        public void finish(int level, GherkinDocumentWalker.Description description) {
+            ensureSpacing();
+        }
 
         @Override
         public void start(int level, Rule rule) {
@@ -120,8 +128,7 @@ public final class Pretty {
 
         @Override
         public void handle(int level, Examples examples) {
-            ensureSpacing();
-            writeLine(level, formatTitle(examples.getKeyword(), examples.getKeyword()));
+            writeLine(level, formatTitle(examples.getKeyword(), examples.getName()));
             tableFormatter.setCurrentTable(examples);
         }
 
@@ -137,9 +144,8 @@ public final class Pretty {
 
         @Override
         public void handle(int level, Comment comment) {
-            writeLine(level, comment.getText().trim());
+            writeLine(level, formatComment(comment));
         }
-
 
         private void writeLine(int level, String line) {
             if (line.isBlank()) {
@@ -164,8 +170,13 @@ public final class Pretty {
             consecutiveNewLinesWritten++;
         }
 
+        private static String formatComment(Comment comment) {
+            var trimmed = comment.getText().trim().substring(1).trim();
+            return "# " + trimmed;
+        }
+
         private static String formatTitle(String keyword, String name) {
-            if (name.isBlank()) {
+            if (name.isEmpty()) {
                 return keyword + ":";
             }
             return "%s: %s".formatted(keyword, name);

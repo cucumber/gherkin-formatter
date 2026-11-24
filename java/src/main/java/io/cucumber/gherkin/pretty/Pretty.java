@@ -114,14 +114,23 @@ public final class Pretty {
             writeLine(level, formatDocStringCommentOpen(docString));
             docString.getContent()
                     .lines()
-                    .map(this::formatDocStringLine)
+                    .map(docStringLine -> formatDocStringLine(docString, docStringLine))
                     .forEach(line -> writeLine(level, line));
             writeLine(level, formatDocStringCommentClose(docString));
         }
 
-        private String formatDocStringLine(String docStringLine) {
-            // TODO: Handle escapes
-            return docStringLine;
+        private static final String DOCSTRING_SEPARATOR = "\"\"\"";
+        private static final String ESCAPED_DOCSTRING_SEPARATOR = "\\\\\"\\\\\"\\\\\"";
+        private static final String DOCSTRING_ALTERNATIVE_SEPARATOR = "```";
+        private static final String ESCAPED_DOCSTRING_ALTERNATIVE_SEPARATOR = "\\\\`\\\\`\\\\`";
+
+        private String formatDocStringLine(DocString docString, String docStringLine) {
+            if (docString.getDelimiter().equals(DOCSTRING_SEPARATOR)) {
+                return docStringLine.replaceAll(DOCSTRING_SEPARATOR, ESCAPED_DOCSTRING_SEPARATOR);
+            } else {
+                return docStringLine.replaceAll(DOCSTRING_ALTERNATIVE_SEPARATOR, ESCAPED_DOCSTRING_ALTERNATIVE_SEPARATOR);
+            }
+
         }
 
         @Override

@@ -1,6 +1,7 @@
-package io.cucumber.gherkin.pretty;
+package io.cucumber.gherkin.pretty.test;
 
 import io.cucumber.gherkin.GherkinParser;
+import io.cucumber.gherkin.pretty.Pretty;
 import io.cucumber.messages.NdjsonToMessageReader;
 import io.cucumber.messages.ndjson.Json;
 import io.cucumber.messages.types.Envelope;
@@ -27,6 +28,7 @@ class PrettyAcceptanceTest {
 
     @Nested
     class GherkinUtils {
+
         private static final GherkinParser parser = GherkinParser.builder()
                 .includePickles(false)
                 .build();

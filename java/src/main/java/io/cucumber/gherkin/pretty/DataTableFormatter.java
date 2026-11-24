@@ -8,15 +8,15 @@ import io.cucumber.messages.types.TableRow;
 import java.util.List;
 import java.util.function.Consumer;
 
-final class PickleTableFormatter {
+final class DataTableFormatter {
 
     private int[] longestCellLengthInColumn = new int[0];
 
 
-    PickleTableFormatter() {
+    DataTableFormatter() {
     }
 
-    void setCurrentTable(DataTable dataTable){
+    void setCurrentTable(DataTable dataTable) {
         longestCellLengthInColumn = findLongestCellLengthInColumn(dataTable);
     }
 
@@ -58,7 +58,8 @@ final class PickleTableFormatter {
         int width = longestCellInColumnLength.length;
         for (int colIndex = 0; colIndex < width; colIndex++) {
             int current = longestCellInColumnLength[colIndex];
-            int candidate = renderCell(row.getCells().get(colIndex)).length();
+            TableCell cell = row.getCells().get(colIndex);
+            int candidate = cellLength(renderCell(cell));
             longestCellInColumnLength[colIndex] = Math.max(current, candidate);
         }
     }
@@ -72,16 +73,40 @@ final class PickleTableFormatter {
         var cells = tableRow.getCells();
         for (int i = 0; i < cells.size(); i++) {
             var cellText = renderCell(cells.get(i));
-            int padding = longestCellLengthInColumn[i] - cellText.length();
+            int padding = longestCellLengthInColumn[i] - cellLength(cellText);
             builder.append(renderCellWithPadding(cellText, padding));
             builder.append("|");
         }
         return builder.toString();
     }
 
+    private int cellLength(String rendered) {
+        return rendered.codePoints() //
+                .map(codepoint ->
+                        // CJK
+                        ('\u3000' <= codepoint && codepoint <= '\u9fff')
+                                // Korean
+                                || ('\uac00' <= codepoint && codepoint <= '\ud7af')
+                                // Full width characters
+                                || ('\uff01' <= codepoint && codepoint <= '\uff60') //
+                                ? 2 : 1)
+                .sum();
+    }
+
     private String renderCell(TableCell cell) {
-        // TODO: Handle escapes
-        return cell.getValue();
+        var value = cell.getValue();
+        int length = value.length();
+        var builder = new StringBuilder(length);
+        for (int i = 0; i < length; ++i) {
+            char c = value.charAt(i);
+            builder.append(switch (c) {
+                case '\\' -> "\\\\";
+                case '\n' -> "\\n";
+                case '|' -> "\\|";
+                default -> c;
+            });
+        }
+        return builder.toString();
     }
 
     private static String renderCellWithPadding(String cellText, int padding) {

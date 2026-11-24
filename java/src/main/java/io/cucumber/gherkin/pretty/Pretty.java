@@ -31,7 +31,7 @@ public final class Pretty {
 
         private static final String INDENT = "  ";
 
-        private final PickleTableFormatter tableFormatter = new PickleTableFormatter();
+        private final DataTableFormatter tableFormatter = new DataTableFormatter();
         private final StringBuilder builder = new StringBuilder();
 
         private int consecutiveNewLinesWritten = 1; // empty document

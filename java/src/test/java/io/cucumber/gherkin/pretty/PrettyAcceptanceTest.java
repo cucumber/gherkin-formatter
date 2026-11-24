@@ -17,9 +17,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -87,10 +87,18 @@ class PrettyAcceptanceTest {
                 .map(json -> json.deserializer(Envelope.class))
                 .orElseThrow()::readValue;
 
+        private static final Set<String> unsupported = Set.of(
+                // The Markdown feature is written in Markdown so it will never
+                // have a matching pretty gherkin representation.
+                "markdown"
+        );
 
         @ParameterizedTest
         @MethodSource("acceptance")
         void test(TestCase testCase) {
+            if (unsupported.contains(testCase.name)) {
+                return;
+            }
             assertEquals(testCase.expected, testCase.pretty.format(testCase.actual));
         }
 

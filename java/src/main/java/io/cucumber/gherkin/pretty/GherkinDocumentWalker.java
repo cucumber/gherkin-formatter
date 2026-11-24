@@ -160,6 +160,7 @@ class GherkinDocumentWalker {
     private void walkFeatureChild(int level, FeatureChild child, List<Comment> remainingComments, Handler handler) {
         child.getRule().ifPresent(rule -> {
             handler.start(level, rule);
+            walkTagRuleTags(level, rule, remainingComments, handler);
             walkCommentsUpto(level, remainingComments, rule.getLocation(), handler);
             handler.handle(level, rule);
             walkDescription(level, rule.getDescription(), handler);
@@ -178,6 +179,10 @@ class GherkinDocumentWalker {
             walkScenario(level, scenario, remainingComments, handler);
             handler.finish(level, scenario);
         });
+    }
+
+    private void walkTagRuleTags(int level, Rule rule, List<Comment> remainingComments, Handler handler) {
+        walkTags(level, rule.getTags(), remainingComments, handler);
     }
 
     private void walkRuleChildren(int level, Rule rule, List<Comment> remainingComments, Handler handler) {

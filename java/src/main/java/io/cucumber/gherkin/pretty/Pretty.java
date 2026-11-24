@@ -1,5 +1,6 @@
 package io.cucumber.gherkin.pretty;
 
+import io.cucumber.gherkin.pretty.GherkinDocumentWalker.Description;
 import io.cucumber.messages.types.Background;
 import io.cucumber.messages.types.Comment;
 import io.cucumber.messages.types.DataTable;
@@ -38,7 +39,7 @@ public final class Pretty {
 
         @Override
         public void start(int level, Feature feature) {
-            ensureSpacing();
+            ensureEmptyLine();
         }
 
         @Override
@@ -57,20 +58,26 @@ public final class Pretty {
         }
 
         @Override
-        public void handle(int level, GherkinDocumentWalker.Description description) {
+        public void start(int level, Description description) {
+            // TODO: Make spacing configurable
+            ensureEmptyLine();
+        }
+
+        @Override
+        public void handle(int level, Description description) {
             description.body().stripTrailing().stripIndent().lines()
                     .map(String::stripTrailing)
                     .forEach(s -> writeLine(level, s));
         }
 
         @Override
-        public void finish(int level, GherkinDocumentWalker.Description description) {
-            ensureSpacing();
+        public void finish(int level, Description description) {
+            ensureEmptyLine();
         }
 
         @Override
         public void start(int level, Rule rule) {
-            ensureSpacing();
+            ensureEmptyLine();
         }
 
         @Override
@@ -80,7 +87,7 @@ public final class Pretty {
 
         @Override
         public void start(int level, Background background) {
-            ensureSpacing();
+            ensureEmptyLine();
         }
 
         @Override
@@ -90,7 +97,7 @@ public final class Pretty {
 
         @Override
         public void start(int level, Scenario scenario) {
-            ensureSpacing();
+            ensureEmptyLine();
         }
 
         @Override
@@ -125,7 +132,7 @@ public final class Pretty {
 
         @Override
         public void start(int level, Examples scenario) {
-            ensureSpacing();
+            ensureEmptyLine();
         }
 
         @Override
@@ -160,7 +167,7 @@ public final class Pretty {
             }
         }
 
-        private void ensureSpacing() {
+        private void ensureEmptyLine() {
             if (consecutiveNewLinesWritten == 0) {
                 writeLine();
             }

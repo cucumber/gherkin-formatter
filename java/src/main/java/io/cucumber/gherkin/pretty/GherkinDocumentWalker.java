@@ -1,7 +1,5 @@
 package io.cucumber.gherkin.pretty;
 
-import io.cucumber.gherkin.pretty.Handler.Description;
-import io.cucumber.gherkin.pretty.Handler.TagLine;
 import io.cucumber.messages.types.Background;
 import io.cucumber.messages.types.Comment;
 import io.cucumber.messages.types.DataTable;
@@ -37,13 +35,13 @@ class GherkinDocumentWalker {
     }
 
     private void walkFeature(int level, Feature feature, List<Comment> remainingComments, Handler handler) {
-        handler.start(level, feature);
+        handler.startFeature(level, feature);
         walkFeatureTags(level, feature, remainingComments, handler);
         walkCommentsUpto(level, remainingComments, feature.getLocation(), handler);
-        handler.handle(level, feature);
+        handler.handleFeature(level, feature);
         walkDescription(level, feature.getDescription(), handler);
         walkFeatureChildren(level, feature, remainingComments, handler);
-        handler.finish(level, feature);
+        handler.finishFeature(level, feature);
     }
 
     private void walkDescription(int level, String description, Handler handler) {
@@ -51,10 +49,9 @@ class GherkinDocumentWalker {
             return;
         }
 
-        var wrapper = new Description(description);
-        handler.start(level + 1, wrapper);
-        handler.handle(level + 1, wrapper);
-        handler.finish(level, wrapper);
+        handler.startDescription(level + 1, description);
+        handler.handleDescription(level + 1, description);
+        handler.finishDescription(level, description);
     }
 
     private void walkFeatureTags(int level, Feature feature, List<Comment> remainingComments, Handler handler) {
@@ -67,25 +64,25 @@ class GherkinDocumentWalker {
 
     private void walkFeatureChild(int level, FeatureChild child, List<Comment> remainingComments, Handler handler) {
         child.getRule().ifPresent(rule -> {
-            handler.start(level, rule);
+            handler.startRule(level, rule);
             walkTagRuleTags(level, rule, remainingComments, handler);
             walkCommentsUpto(level, remainingComments, rule.getLocation(), handler);
-            handler.handle(level, rule);
+            handler.handleRule(level, rule);
             walkDescription(level, rule.getDescription(), handler);
             walkRuleChildren(level, rule, remainingComments, handler);
-            handler.finish(level, rule);
+            handler.finishRule(level, rule);
         });
 
         child.getBackground().ifPresent(background -> {
-            handler.start(level, background);
+            handler.startBackground(level, background);
             walkBackground(level, background, remainingComments, handler);
-            handler.finish(level, background);
+            handler.finishBackground(level, background);
         });
 
         child.getScenario().ifPresent(scenario -> {
-            handler.start(level, scenario);
+            handler.startScenario(level, scenario);
             walkScenario(level, scenario, remainingComments, handler);
-            handler.finish(level, scenario);
+            handler.finishScenario(level, scenario);
         });
     }
 
@@ -108,23 +105,23 @@ class GherkinDocumentWalker {
     }
 
     private void walkBackground(int level, Background background, List<Comment> remainingComments, Handler handler) {
-        handler.start(level, background);
+        handler.startBackground(level, background);
         walkCommentsUpto(level, remainingComments, background.getLocation(), handler);
-        handler.handle(level, background);
+        handler.handleBackground(level, background);
         walkDescription(level, background.getDescription(), handler);
         walkSteps(level, background, remainingComments, handler);
-        handler.finish(level, background);
+        handler.finishBackground(level, background);
     }
 
     private void walkScenario(int level, Scenario scenario, List<Comment> remainingComments, Handler handler) {
-        handler.start(level, scenario);
+        handler.startScenario(level, scenario);
         walkScenarioTags(level, scenario, remainingComments, handler);
         walkCommentsUpto(level, remainingComments, scenario.getLocation(), handler);
-        handler.handle(level, scenario);
+        handler.handleScenario(level, scenario);
         walkDescription(level, scenario.getDescription(), handler);
         walkSteps(level, scenario, remainingComments, handler);
         walkExamples(level, scenario, remainingComments, handler);
-        handler.finish(level, scenario);
+        handler.finishScenario(level, scenario);
     }
 
     private void walkScenarioTags(int level, Scenario scenario, List<Comment> remainingComments, Handler handler) {
@@ -141,7 +138,7 @@ class GherkinDocumentWalker {
 
     private void walkStep(int level, Step step, List<Comment> remainingComments, Handler handler) {
         walkCommentsUpto(level, remainingComments, step.getLocation(), handler);
-        handler.handle(level, step);
+        handler.handleStep(level, step);
         walkStepArguments(level, step, remainingComments, handler);
     }
 
@@ -163,7 +160,7 @@ class GherkinDocumentWalker {
 
     private void walkDataTable(int level, DataTable dataTable, List<Comment> remainingComments, Handler handler) {
         walkCommentsUpto(level, remainingComments, dataTable.getLocation(), handler);
-        handler.handle(level, dataTable);
+        handler.handleDataTable(level, dataTable);
         walkDataTableRows(level, dataTable, remainingComments, handler);
     }
 
@@ -173,12 +170,12 @@ class GherkinDocumentWalker {
 
     private void walkDatTableRow(int level, TableRow tableRow, List<Comment> remainingComments, Handler handler) {
         walkCommentsUpto(level, remainingComments, tableRow.getLocation(), handler);
-        handler.handle(level, tableRow);
+        handler.handleTableRow(level, tableRow);
     }
 
     private void walkDocString(int level, DocString docString, List<Comment> remainingComments, Handler handler) {
         walkCommentsUpto(level, remainingComments, docString.getLocation(), handler);
-        handler.handle(level, docString);
+        handler.handleDocString(level, docString);
     }
 
     private void walkExamples(int level, Scenario scenario, List<Comment> remainingComments, Handler handler) {
@@ -186,14 +183,14 @@ class GherkinDocumentWalker {
     }
 
     private void walkExamples(int level, Examples examples, List<Comment> remainingComments, Handler handler) {
-        handler.start(level, examples);
+        handler.startExample(level, examples);
         walkExamplesTags(level, examples, remainingComments, handler);
         walkCommentsUpto(level, remainingComments, examples.getLocation(), handler);
-        handler.handle(level, examples);
+        handler.handleExamples(level, examples);
         walkDescription(level, examples.getDescription(), handler);
         examples.getTableHeader().ifPresent(tableRow -> walkExampleTableRow(level + 1, tableRow, remainingComments, handler));
         examples.getTableBody().forEach(tableRow -> walkExampleTableRow(level + 1, tableRow, remainingComments, handler));
-        handler.finish(level, examples);
+        handler.finishExamples(level, examples);
     }
 
     private void walkExamplesTags(int level, Examples examples, List<Comment> remainingComments, Handler handler) {
@@ -202,20 +199,22 @@ class GherkinDocumentWalker {
 
     private void walkExampleTableRow(int level, TableRow tableRow, List<Comment> remainingComments, Handler handler) {
         walkCommentsUpto(level, remainingComments, tableRow.getLocation(), handler);
-        handler.handle(level, tableRow);
+        handler.handleTableRow(level, tableRow);
     }
 
     private void walkTags(int level, List<Tag> tags, List<Comment> remainingComments, Handler handler) {
         if (tags.isEmpty()) {
             return;
         }
+        handler.startTags(level, tags);
         var tagsByLocation = tags.stream() //
                 .collect(groupingBy(tag -> tag.getLocation().getLine(), LinkedHashMap::new, toList()));
         tagsByLocation.forEach((integer, tagOnSameLine) -> {
             var location = tagOnSameLine.get(0).getLocation();
             walkCommentsUpto(level, remainingComments, location, handler);
-            handler.handle(level, new TagLine(location, tagOnSameLine));
+            handler.handleTagLine(level, tagOnSameLine);
         });
+        handler.finishTags(level, tags);
     }
 
     private void walkCommentsUpto(int level, List<Comment> remainingComments, Location currentLocation, Handler handler) {
@@ -233,7 +232,7 @@ class GherkinDocumentWalker {
     }
 
     private void walkComment(int level, Comment comment, Handler handler) {
-        handler.handle(level, comment);
+        handler.handleComment(level, comment);
     }
 
 }

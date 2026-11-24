@@ -17,94 +17,82 @@ import java.util.List;
 
 interface Handler {
 
-    default void start(int level, Feature feature) {
+    default void startFeature(int level, Feature feature) {
     }
 
-    default void start(int level, Description description) {
+    default void startDescription(int level, String description) {
     }
 
-    default void start(int level, Rule rule) {
+    default void startRule(int level, Rule rule) {
     }
 
-    default void start(int level, Background background) {
+    default void startBackground(int level, Background background) {
     }
 
-    default void start(int level, Scenario scenario) {
+    default void startScenario(int level, Scenario scenario) {
     }
 
-    default void start(int level, Examples scenario) {
+    default void startExample(int level, Examples scenario) {
     }
 
-    default void finish(int level, Feature feature) {
+    default void startTags(int level, List<Tag> tags){
     }
 
-    default void finish(int level, Description description) {
+    default void finishFeature(int level, Feature feature) {
     }
 
-    default void finish(int level, Rule rule) {
+    default void finishDescription(int level, String description) {
     }
 
-    default void finish(int level, Background background) {
+    default void finishRule(int level, Rule rule) {
     }
 
-    default void finish(int level, Scenario scenario) {
+    default void finishBackground(int level, Background background) {
     }
 
-    default void finish(int level, Examples scenario) {
+    default void finishScenario(int level, Scenario scenario) {
     }
 
-    default void handle(int level, Feature rule) {
+    default void finishExamples(int level, Examples scenario) {
     }
 
-    default void handle(int level, Description description) {
+    default void finishTags(int level, List<Tag> tags){
     }
 
-    default void handle(int level, Rule rule) {
+    default void handleFeature(int level, Feature rule) {
     }
 
-    default void handle(int level, Background background) {
+    default void handleDescription(int level, String description) {
     }
 
-    default void handle(int level, Scenario scenario) {
+    default void handleRule(int level, Rule rule) {
     }
 
-    default void handle(int level, Step step) {
+    default void handleBackground(int level, Background background) {
     }
 
-    default void handle(int level, DataTable dataTable) {
+    default void handleScenario(int level, Scenario scenario) {
     }
 
-    default void handle(int level, DocString docString) {
+    default void handleStep(int level, Step step) {
     }
 
-    default void handle(int level, Examples examples) {
+    default void handleDataTable(int level, DataTable dataTable) {
     }
 
-    default void handle(int level, TableRow tableRow) {
+    default void handleDocString(int level, DocString docString) {
     }
 
-    default void handle(int level, TagLine tagLine) {
+    default void handleExamples(int level, Examples examples) {
     }
 
-
-    default void handle(int level, Comment comment) {
+    default void handleTableRow(int level, TableRow tableRow) {
     }
 
-
-    /**
-     * Synthetic representation of a group of tags.
-     *
-     * <p>Tags are not logically grouped in a GherkinDocument
-     * but in practice act like a logical group.
-     */
-    record TagLine(Location location, List<Tag> tags) {
-
+    default void handleTagLine(int level, List<Tag> tagLine) {
     }
 
-    /**
-     * Synthetic representation of a description.
-     */
-    record Description(String body) {
-
+    default void handleComment(int level, Comment comment) {
     }
+
 }

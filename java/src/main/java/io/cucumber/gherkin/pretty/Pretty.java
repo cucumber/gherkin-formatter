@@ -13,6 +13,7 @@ import io.cucumber.messages.types.Step;
 import io.cucumber.messages.types.TableRow;
 import io.cucumber.messages.types.Tag;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public final class Pretty {
@@ -29,6 +30,10 @@ public final class Pretty {
 
     private static final class PrettyHandler implements Handler {
 
+        private static final String DOCSTRING_SEPARATOR = "\"\"\"";
+        private static final String ESCAPED_DOCSTRING_SEPARATOR = "\\\\\"\\\\\"\\\\\"";
+        private static final String DOCSTRING_ALTERNATIVE_SEPARATOR = "```";
+        private static final String ESCAPED_DOCSTRING_ALTERNATIVE_SEPARATOR = "\\\\`\\\\`\\\\`";
         private static final String INDENT = "  ";
 
         private final DataTableFormatter tableFormatter = new DataTableFormatter();
@@ -37,12 +42,12 @@ public final class Pretty {
         private int consecutiveNewLinesWritten = 1; // empty document
 
         @Override
-        public void start(int level, Feature feature) {
+        public void startFeature(int level, Feature feature) {
             ensureEmptyLine();
         }
 
         @Override
-        public void handle(int level, Feature feature) {
+        public void handleFeature(int level, Feature feature) {
             handleLanguage(level, feature);
             writeLine(level, formatTitle(feature.getKeyword(), feature.getName()));
         }
@@ -57,60 +62,60 @@ public final class Pretty {
         }
 
         @Override
-        public void start(int level, Description description) {
+        public void startDescription(int level, String description) {
             // TODO: Make spacing configurable
             ensureEmptyLine();
         }
 
         @Override
-        public void handle(int level, Description description) {
-            description.body().stripTrailing().stripIndent().lines()
+        public void handleDescription(int level, String description) {
+            description.stripTrailing().stripIndent().lines()
                     .map(String::stripTrailing)
                     .forEach(s -> writeLine(level, s));
         }
 
         @Override
-        public void finish(int level, Description description) {
+        public void finishDescription(int level, String description) {
             ensureEmptyLine();
         }
 
         @Override
-        public void start(int level, Rule rule) {
+        public void startRule(int level, Rule rule) {
             ensureEmptyLine();
         }
 
         @Override
-        public void handle(int level, Rule rule) {
+        public void handleRule(int level, Rule rule) {
             writeLine(level, formatTitle(rule.getKeyword(), rule.getName()));
         }
 
         @Override
-        public void start(int level, Background background) {
+        public void startBackground(int level, Background background) {
             ensureEmptyLine();
         }
 
         @Override
-        public void handle(int level, Background background) {
+        public void handleBackground(int level, Background background) {
             writeLine(level, formatTitle(background.getKeyword(), background.getName()));
         }
 
         @Override
-        public void start(int level, Scenario scenario) {
+        public void startScenario(int level, Scenario scenario) {
             ensureEmptyLine();
         }
 
         @Override
-        public void handle(int level, Scenario scenario) {
+        public void handleScenario(int level, Scenario scenario) {
             writeLine(level, formatTitle(scenario.getKeyword(), scenario.getName()));
         }
 
         @Override
-        public void handle(int level, Step step) {
+        public void handleStep(int level, Step step) {
             writeLine(level, formatStep(step.getKeyword(), step.getText()));
         }
 
         @Override
-        public void handle(int level, DocString docString) {
+        public void handleDocString(int level, DocString docString) {
             writeLine(level, formatDocStringCommentOpen(docString));
             docString.getContent()
                     .lines()
@@ -119,10 +124,6 @@ public final class Pretty {
             writeLine(level, formatDocStringCommentClose(docString));
         }
 
-        private static final String DOCSTRING_SEPARATOR = "\"\"\"";
-        private static final String ESCAPED_DOCSTRING_SEPARATOR = "\\\\\"\\\\\"\\\\\"";
-        private static final String DOCSTRING_ALTERNATIVE_SEPARATOR = "```";
-        private static final String ESCAPED_DOCSTRING_ALTERNATIVE_SEPARATOR = "\\\\`\\\\`\\\\`";
 
         private String formatDocStringLine(DocString docString, String docStringLine) {
             if (docString.getDelimiter().equals(DOCSTRING_SEPARATOR)) {
@@ -134,33 +135,33 @@ public final class Pretty {
         }
 
         @Override
-        public void handle(int level, DataTable dataTable) {
+        public void handleDataTable(int level, DataTable dataTable) {
             tableFormatter.setCurrentTable(dataTable);
         }
 
         @Override
-        public void start(int level, Examples scenario) {
+        public void startExample(int level, Examples scenario) {
             ensureEmptyLine();
         }
 
         @Override
-        public void handle(int level, Examples examples) {
+        public void handleExamples(int level, Examples examples) {
             writeLine(level, formatTitle(examples.getKeyword(), examples.getName()));
             tableFormatter.setCurrentTable(examples);
         }
 
         @Override
-        public void handle(int level, TableRow tableRow) {
+        public void handleTableRow(int level, TableRow tableRow) {
             tableFormatter.formatTableRowTo(tableRow, line -> writeLine(level, line));
         }
 
         @Override
-        public void handle(int level, TagLine tags) {
-            writeLine(level, tags.tags().stream().map(Tag::getName).collect(Collectors.joining(" ")));
+        public void handleTagLine(int level, List<Tag> tags) {
+            writeLine(level, tags.stream().map(Tag::getName).collect(Collectors.joining(" ")));
         }
 
         @Override
-        public void handle(int level, Comment comment) {
+        public void handleComment(int level, Comment comment) {
             writeLine(level, formatComment(comment));
         }
 

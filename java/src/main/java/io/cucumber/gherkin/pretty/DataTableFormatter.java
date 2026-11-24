@@ -12,7 +12,6 @@ final class DataTableFormatter {
 
     private int[] longestCellLengthInColumn = new int[0];
 
-
     DataTableFormatter() {
     }
 
@@ -110,16 +109,8 @@ final class DataTableFormatter {
     }
 
     private static String renderCellWithPadding(String cellText, int padding) {
-        StringBuilder result = new StringBuilder();
-        result.append(" ");
-        result.append(cellText);
-        padSpace(result, padding);
-        result.append(" ");
-        return result.toString();
-    }
-
-    private static void padSpace(StringBuilder result, int padding) {
-        result.append(" ".repeat(padding));
+        // TODO: Number alignment
+        return " " + cellText +" ".repeat(padding) + " ";
     }
 
 }

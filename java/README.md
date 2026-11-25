@@ -23,7 +23,7 @@ parser.parse(Path.of("path/to/example.feature"))
         .flatMap(Optional::stream)
         .findFirst()
         .ifPresent(gherkinDocument -> {
-            var pretty = new Pretty();
+            var pretty = Pretty.builder().build();
             var formattedDocument = pretty.format(gherkinDocument)
             // Use formattedDocument for something 
         });

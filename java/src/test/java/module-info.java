@@ -6,6 +6,7 @@ module io.cucumber.gherkin.pretty.test {
     requires io.cucumber.gherkin.pretty;
     requires io.cucumber.messages;
     requires io.cucumber.messages.ndjson;
+    requires org.assertj.core;
 
     opens io.cucumber.gherkin.pretty.test;
 }

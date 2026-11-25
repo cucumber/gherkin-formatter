@@ -18,19 +18,19 @@ import java.util.stream.Collectors;
 
 final class PrettyHandler implements Handler {
 
-    private static final String INDENT = "  ";
-
     private final DataTableFormatter tableFormatter = new DataTableFormatter();
     private final DocStringFormatter docStringFormatter = new DocStringFormatter();
     private final CommentFormatter commentFormatter = new CommentFormatter();
 
+    private final Configuration configuration;
     private final PrintWriter writer;
 
     private int depth = -1;
     private int consecutiveNewLinesWritten = 1; // empty document
     private int enqueuedEmptyLines = 0;
 
-    PrettyHandler(PrintWriter writer) {
+    PrettyHandler(Configuration configuration, PrintWriter writer) {
+        this.configuration = configuration;
         this.writer = writer;
     }
 
@@ -241,7 +241,9 @@ final class PrettyHandler implements Handler {
         if (enqueuedEmptyLines > 0) {
             writeLine();
         }
-        writer.write(INDENT.repeat(depth));
+        for (int i = 0; i < depth; i++) {
+            writer.write(configuration.indentation());
+        }
         writer.append(line);
         writeLine();
         consecutiveNewLinesWritten = 0;
@@ -259,7 +261,7 @@ final class PrettyHandler implements Handler {
 
     private void writeLine() {
         // TODO: Which newline?
-        writer.append("\n");
+        writer.println();
         consecutiveNewLinesWritten++;
         enqueuedEmptyLines = 0;
     }

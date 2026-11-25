@@ -13,6 +13,11 @@ import io.cucumber.messages.types.Step;
 import io.cucumber.messages.types.TableRow;
 import io.cucumber.messages.types.Tag;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,9 +28,16 @@ public final class Pretty {
     }
 
     public String format(GherkinDocument gherkinDocument) {
-        var pretty = new PrettyHandler();
-        new GherkinDocumentWalker().walkGherkinDocument(gherkinDocument, pretty);
-        return pretty.toString();
+        var out = new ByteArrayOutputStream();
+        formatTo(gherkinDocument, out);
+        return out.toString(StandardCharsets.UTF_8);
+    }
+
+    public void formatTo(GherkinDocument gherkinDocument, OutputStream out) {
+        try (var printWriter = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
+            var handler = new PrettyHandler(printWriter);
+            new GherkinDocumentWalker().walkGherkinDocument(gherkinDocument, handler);
+        }
     }
 
     private static final class PrettyHandler implements Handler {
@@ -35,11 +47,16 @@ public final class Pretty {
         private final DataTableFormatter tableFormatter = new DataTableFormatter();
         private final DocStringFormatter docStringFormatter = new DocStringFormatter();
         private final CommentFormatter commentFormatter = new CommentFormatter();
-        private final StringBuilder out = new StringBuilder();
+
+        private final PrintWriter writer;
 
         private int depth = -1;
         private int consecutiveNewLinesWritten = 1; // empty document
         private int enqueuedEmptyLines = 0;
+
+        private PrettyHandler(PrintWriter writer) {
+            this.writer = writer;
+        }
 
         @Override
         public void startFeature(Feature feature) {
@@ -248,8 +265,8 @@ public final class Pretty {
             if (enqueuedEmptyLines > 0) {
                 writeLine();
             }
-            out.append(INDENT.repeat(depth));
-            out.append(line);
+            writer.write(INDENT.repeat(depth));
+            writer.append(line);
             writeLine();
             consecutiveNewLinesWritten = 0;
         }
@@ -266,7 +283,7 @@ public final class Pretty {
 
         private void writeLine() {
             // TODO: Which newline?
-            out.append("\n");
+            writer.append("\n");
             consecutiveNewLinesWritten++;
             enqueuedEmptyLines = 0;
         }
@@ -283,10 +300,5 @@ public final class Pretty {
             return "%s%s".formatted(keyword, text);
         }
 
-
-        @Override
-        public String toString() {
-            return out.toString();
-        }
     }
 }

@@ -1,9 +1,9 @@
 package io.cucumber.gherkin.pretty.test;
 
 import io.cucumber.gherkin.GherkinParser;
-import io.cucumber.gherkin.pretty.Pretty;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.GherkinDocument;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -35,14 +35,14 @@ class PrettyAcceptanceTest {
     }
 
     @Nested
-    class GherkinPretty {
+    class Pretty {
 
         static List<TestCase> acceptance() throws IOException {
             var actualDirectory = Paths.get("..", "testdata", "gherkin-pretty", "src");
             var expectedDirectory = Paths.get("..", "testdata", "gherkin-pretty", "expected");
             return findFeatures(actualDirectory)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedDirectory, new Pretty()))
+                    .map(actual -> new TestCase(actual, expectedDirectory, new io.cucumber.gherkin.pretty.Pretty()))
                     .toList();
         }
 
@@ -50,7 +50,7 @@ class PrettyAcceptanceTest {
         @MethodSource("acceptance")
         @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void test(TestCase testCase) throws Exception {
-            assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
+            Assertions.assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
         }
 
         @ParameterizedTest
@@ -70,7 +70,7 @@ class PrettyAcceptanceTest {
             var expectedDirectory = Paths.get("..", "testdata", "gherkin-utils", "expected");
             return findFeatures(actualDirectory)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedDirectory, new Pretty()))
+                    .map(actual -> new TestCase(actual, expectedDirectory, new io.cucumber.gherkin.pretty.Pretty()))
                     .toList();
         }
 
@@ -83,7 +83,7 @@ class PrettyAcceptanceTest {
             if (unsupported.contains(testCase.name)) {
                 return;
             }
-            assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
+            Assertions.assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
         }
 
         @ParameterizedTest
@@ -106,14 +106,14 @@ class PrettyAcceptanceTest {
             var expectedAndActual = Paths.get("..", "testdata", "compatibility-kit", "src");
             return findFeatures(expectedAndActual)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedAndActual, new Pretty()))
+                    .map(actual -> new TestCase(actual, expectedAndActual, new io.cucumber.gherkin.pretty.Pretty()))
                     .toList();
         }
 
         @ParameterizedTest
         @MethodSource("acceptance")
         void test(TestCase testCase) throws Exception {
-            assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
+            Assertions.assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
         }
 
     }
@@ -124,12 +124,12 @@ class PrettyAcceptanceTest {
                 .includePickles(false)
                 .build();
 
-        private final Pretty pretty;
+        private final io.cucumber.gherkin.pretty.Pretty pretty;
         private final String name;
         private final Path actualPath;
         private final Path expectedPath;
 
-        TestCase(Path actualPath, Path expectedDirectory, Pretty pretty) {
+        TestCase(Path actualPath, Path expectedDirectory, io.cucumber.gherkin.pretty.Pretty pretty) {
             this.pretty = pretty;
             String fileName = actualPath.getFileName().toString();
             this.name = fileName.substring(0, fileName.lastIndexOf("."));

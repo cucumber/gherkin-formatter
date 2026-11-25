@@ -5,5 +5,26 @@ Gherkin Pretty Usage and Installation
 
 ## Installation
 
-⚠️ This is an internal package; you don't need to install it in order to pretty
-format Gherkin documents.
+Download it from Maven Central.
+
+## Usage
+
+Use [io.cucumber:gherkin](https://github.com/cucumber/gherkin) to parse a
+feature file. Then format it with Gherkin `Pretty` formatter. 
+
+```java
+GherkinParser parser = GherkinParser.builder()
+        .includePickles(false)
+        .build();
+
+parser.parse(Path.of("path/to/example.feature"))
+        .map(Envelope::getGherkinDocument)
+        .filter(Optional::isPresent)
+        .flatMap(Optional::stream)
+        .findFirst()
+        .ifPresent(gherkinDocument -> {
+            var pretty = new Pretty();
+            var formattedDocument = pretty.format(gherkinDocument)
+            // Use formattedDocument for something 
+        });
+```

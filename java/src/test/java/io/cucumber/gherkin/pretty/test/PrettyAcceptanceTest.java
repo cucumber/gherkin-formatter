@@ -70,6 +70,7 @@ class PrettyAcceptanceTest {
         void test(TestCase testCase) throws Exception {
             assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
         }
+
     }
 
     static class TestCase {

@@ -18,5 +18,5 @@
 ## Contributing
 
 Each language implementation validates itself against the examples in the
-`testdata` folder. See the [testdata/README.md](testdata/README.md) for more
+`testdata` folder. See the different READMEs for more.
 information.

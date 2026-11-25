@@ -5,6 +5,8 @@ import io.cucumber.gherkin.pretty.Pretty;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.GherkinDocument;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -51,12 +53,23 @@ class PrettyAcceptanceTest {
 
         @ParameterizedTest
         @MethodSource("acceptance")
+        @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void test(TestCase testCase) throws Exception {
             if (unsupported.contains(testCase.name)) {
                 return;
             }
-
             assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
+        }
+
+        @ParameterizedTest
+        @MethodSource("acceptance")
+        @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
+        void update(TestCase testCase) throws Exception {
+            if (unsupported.contains(testCase.name)) {
+                return;
+            }
+            var formatted = testCase.pretty.format(testCase.getActual());
+            Files.writeString(testCase.actual, formatted);
         }
     }
 

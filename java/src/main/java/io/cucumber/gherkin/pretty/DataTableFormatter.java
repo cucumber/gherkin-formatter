@@ -90,14 +90,21 @@ final class DataTableFormatter {
     @SuppressWarnings("UnnecessaryParentheses")
     private int cellLength(String rendered) {
         return rendered.codePoints() //
-                .map(codepoint ->
-                        // CJK
-                        ('\u3000' <= codepoint && codepoint <= '\u9fff')
-                                // Korean
-                                || ('\uac00' <= codepoint && codepoint <= '\ud7af')
-                                // Full width characters
-                                || ('\uff01' <= codepoint && codepoint <= '\uff60') //
-                                ? 2 : 1)
+                .map(codepoint -> {
+                    // CJK
+                    if ('\u3000' <= codepoint && codepoint <= '\u9fff') {
+                        return 2;
+                    }
+                    // Korean
+                    if ('\uac00' <= codepoint && codepoint <= '\ud7af') {
+                        return 2;
+                    }
+                    // Full width characters
+                    if ('\uff01' <= codepoint && codepoint <= '\uff60') {
+                        return 2;
+                    }
+                    return 1;
+                })
                 .sum();
     }
 

@@ -1,28 +1,34 @@
 ##
 # A comment on this feature
+#
 ##
 
 Feature: With leading comments
 
   ##
+  #
   # A comment on this background
+  #
   ##
 
   Background: a background
 
     ##
     # A comment on this step
+    #
     ##
 
     Given a step
 
   ##
   # A comment on this scenario
+  #
   ##
 
   Scenario: A scenario
 
     ##
+    #
     # A comment on this step
     ##
 

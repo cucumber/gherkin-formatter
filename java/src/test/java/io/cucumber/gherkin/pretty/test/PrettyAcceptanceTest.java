@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -58,7 +58,7 @@ class PrettyAcceptanceTest {
         @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void update(TestCase testCase) throws Exception {
             var formatted = testCase.pretty.format(testCase.getActual());
-            Files.writeString(testCase.expectedPath, formatted, CREATE);
+            Files.writeString(testCase.expectedPath, formatted, TRUNCATE_EXISTING);
         }
     }
 
@@ -94,7 +94,7 @@ class PrettyAcceptanceTest {
                 return;
             }
             var formatted = testCase.pretty.format(testCase.getActual());
-            Files.writeString(testCase.expectedPath, formatted, CREATE);
+            Files.writeString(testCase.expectedPath, formatted, TRUNCATE_EXISTING);
         }
     }
 

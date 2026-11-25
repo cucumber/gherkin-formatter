@@ -37,142 +37,210 @@ public final class Pretty {
         private final CommentFormatter commentFormatter = new CommentFormatter();
         private final StringBuilder out = new StringBuilder();
 
+        private int depth = -1;
         private int consecutiveNewLinesWritten = 1; // empty document
         private int enqueuedEmptyLines = 0;
 
         @Override
-        public void startFeature(int level, Feature feature) {
+        public void startFeature(Feature feature) {
+            depth++;
             ensureEmptyLine();
         }
 
         @Override
-        public void handleFeature(int level, Feature feature) {
-            writeLine(level, formatTitle(feature.getKeyword(), feature.getName()));
+        public void handleFeature(Feature feature) {
+            writeLine(formatTitle(feature.getKeyword(), feature.getName()));
         }
 
         @Override
-        public void handleLanguage(int level, String language) {
+        public void finishFeature(Feature feature) {
+            depth--;
+        }
+
+        @Override
+        public void handleLanguage(String language) {
             if ("en".equals(language)) {
                 return;
             }
-            writeLine(level, "# language: %s".formatted(language));
+            writeLine("# language: %s".formatted(language));
         }
 
         @Override
-        public void startDescription(int level, String description) {
+        public void startDescription(String description) {
+            depth++;
             // TODO: Make spacing configurable
             ensureEmptyLine();
         }
 
         @Override
-        public void handleDescription(int level, String description) {
+        public void handleDescription(String description) {
             description.stripTrailing().stripIndent().lines()
                     .map(String::stripTrailing)
-                    .forEach(s -> writeLine(level, s));
+                    .forEach(this::writeLine);
         }
 
         @Override
-        public void finishDescription(int level, String description) {
+        public void finishDescription(String description) {
+            depth--;
             ensureEmptyLine();
         }
 
         @Override
-        public void startRule(int level, Rule rule) {
+        public void startRule(Rule rule) {
+            ensureEmptyLine();
+            depth++;
+        }
+
+        @Override
+        public void handleRule(Rule rule) {
+            writeLine(formatTitle(rule.getKeyword(), rule.getName()));
+        }
+
+        @Override
+        public void finishRule(Rule rule) {
+            depth--;
+        }
+
+        @Override
+        public void startBackground(Background background) {
+            depth++;
             ensureEmptyLine();
         }
 
         @Override
-        public void handleRule(int level, Rule rule) {
-            writeLine(level, formatTitle(rule.getKeyword(), rule.getName()));
+        public void handleBackground(Background background) {
+            writeLine(formatTitle(background.getKeyword(), background.getName()));
         }
 
         @Override
-        public void startBackground(int level, Background background) {
+        public void finishBackground(Background background) {
+            depth--;
+        }
+
+        @Override
+        public void startScenario(Scenario scenario) {
+            depth++;
             ensureEmptyLine();
         }
 
         @Override
-        public void handleBackground(int level, Background background) {
-            writeLine(level, formatTitle(background.getKeyword(), background.getName()));
+        public void handleScenario(Scenario scenario) {
+            writeLine(formatTitle(scenario.getKeyword(), scenario.getName()));
         }
 
         @Override
-        public void startScenario(int level, Scenario scenario) {
-            ensureEmptyLine();
+        public void finishScenario(Scenario scenario) {
+            depth--;
         }
 
         @Override
-        public void handleScenario(int level, Scenario scenario) {
-            writeLine(level, formatTitle(scenario.getKeyword(), scenario.getName()));
+        public void startStep(Step step) {
+            depth++;
         }
 
         @Override
-        public void handleStep(int level, Step step) {
-            writeLine(level, formatStep(step.getKeyword(), step.getText()));
+        public void handleStep(Step step) {
+            writeLine(formatStep(step.getKeyword(), step.getText()));
         }
 
         @Override
-        public void handleDocString(int level, DocString docString) {
-            docStringFormatter.formatTo(docString, line -> writeLine(level, line));
+        public void finishStep(Step step) {
+            depth--;
         }
 
         @Override
-        public void startDataTable(int level, DataTable dataTable) {
+        public void startDocString(DocString docString) {
+            depth++;
+        }
+
+        @Override
+        public void handleDocString(DocString docString) {
+            docStringFormatter.formatTo(docString, this::writeLine);
+        }
+
+        @Override
+        public void finishDocString(DocString docString) {
+            depth--;
+        }
+
+        @Override
+        public void startDataTable(DataTable dataTable) {
+            depth++;
             tableFormatter.setCurrent(dataTable);
         }
 
         @Override
-        public void finishDataTable(int level, DataTable dataTable) {
+        public void finishDataTable(DataTable dataTable) {
+            depth--;
             tableFormatter.clearCurrent();
         }
 
         @Override
-        public void startExamples(int level, Examples examples) {
+        public void handleDataTableRow(TableRow tableRow) {
+            tableFormatter.formatTableRowTo(tableRow, this::writeLine);
+        }
+
+        @Override
+        public void startExamples(Examples examples) {
+            depth++;
             ensureEmptyLine();
             tableFormatter.setCurrent(examples);
         }
 
         @Override
-        public void handleExamples(int level, Examples examples) {
-            writeLine(level, formatTitle(examples.getKeyword(), examples.getName()));
+        public void handleExamples(Examples examples) {
+            writeLine(formatTitle(examples.getKeyword(), examples.getName()));
         }
 
         @Override
-        public void finishExamples(int level, Examples examples) {
+        public void finishExamples(Examples examples) {
+            depth--;
             tableFormatter.clearCurrent();
         }
 
         @Override
-        public void handleTableRow(int level, TableRow tableRow) {
-            tableFormatter.formatTableRowTo(tableRow, line -> writeLine(level, line));
+        public void startExamplesTableRow(TableRow tableRow) {
+            depth++;
         }
 
         @Override
-        public void handleTagLine(int level, List<Tag> tags) {
-            writeLine(level, tags.stream().map(Tag::getName).collect(Collectors.joining(" ")));
+        public void handleExamplesTableRow(TableRow tableRow) {
+            tableFormatter.formatTableRowTo(tableRow, this::writeLine);
         }
 
         @Override
-        public void handleCommentBlock(int level, List<Comment> comments) {
-            commentFormatter.formatCommentBlockTo(comments, comment -> writeLine(level, comment));
+        public void finishExamplesTableRow(TableRow tableRow) {
+            depth--;
         }
 
         @Override
-        public void startDetachedCommentBlock(int level, List<Comment> comments) {
+        public void handleTags(List<Tag> tags) {
+            writeLine(tags.stream().map(Tag::getName).collect(Collectors.joining(" ")));
+        }
+
+        @Override
+        public void handleComments(List<Comment> comments) {
+            commentFormatter.formatCommentBlockTo(comments, this::writeLine);
+        }
+
+        @Override
+        public void startDetachedComments(List<Comment> comments) {
+            depth++;
             ensureEmptyLine();
         }
 
         @Override
-        public void handleDetachedCommentBlock(int level, List<Comment> comments) {
-            commentFormatter.formatCommentBlockTo(comments, comment -> writeLine(level, comment));
+        public void handleDetachedComments(List<Comment> comments) {
+            commentFormatter.formatCommentBlockTo(comments, this::writeLine);
         }
 
         @Override
-        public void finishDetachedCommentBlock(int level, List<Comment> comments) {
+        public void finishDetachedComment(List<Comment> comments) {
+            depth--;
             enqueueEmptyLine();
         }
 
-        private void writeLine(int level, String line) {
+        private void writeLine(String line) {
             if (line.isBlank()) {
                 writeLine();
                 return;
@@ -180,7 +248,7 @@ public final class Pretty {
             if (enqueuedEmptyLines > 0) {
                 writeLine();
             }
-            out.append(INDENT.repeat(level));
+            out.append(INDENT.repeat(depth));
             out.append(line);
             writeLine();
             consecutiveNewLinesWritten = 0;

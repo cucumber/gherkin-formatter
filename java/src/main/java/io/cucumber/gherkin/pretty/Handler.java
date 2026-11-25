@@ -6,6 +6,7 @@ import io.cucumber.messages.types.DataTable;
 import io.cucumber.messages.types.DocString;
 import io.cucumber.messages.types.Examples;
 import io.cucumber.messages.types.Feature;
+import io.cucumber.messages.types.GherkinDocument;
 import io.cucumber.messages.types.Rule;
 import io.cucumber.messages.types.Scenario;
 import io.cucumber.messages.types.Step;
@@ -16,105 +17,162 @@ import java.util.List;
 
 interface Handler {
 
-    default void startFeature(int level, Feature feature) {
+    default void startGherkinDocument(GherkinDocument gherkinDocument) {
     }
 
-    default void startDescription(int level, String description) {
+    default void finishGherkinDocument(GherkinDocument gherkinDocument) {
     }
 
-    default void startRule(int level, Rule rule) {
+    default void handleGherkinDocument(GherkinDocument gherkinDocument) {
     }
 
-    default void startBackground(int level, Background background) {
+
+    default void startFeature(Feature feature) {
     }
 
-    default void startScenario(int level, Scenario scenario) {
+    default void handleFeature(Feature feature) {
     }
 
-    default void startExamples(int level, Examples examples) {
+    default void finishFeature(Feature feature) {
     }
 
-    default void startDataTable(int level, DataTable dataTable) {
+    default void startLanguage(String language) {
     }
 
-    default void startTags(int level, List<Tag> tags) {
+    default void handleLanguage(String language) {
     }
 
-    default void startDetachedCommentBlock(int level, List<Comment> comments) {
+    default void finishLanguage(String language) {
+    }
+
+    default void startDescription(String description) {
+    }
+
+    default void handleDescription(String description) {
+    }
+
+    default void finishDescription(String description) {
+    }
+
+
+    default void startRule(Rule rule) {
+    }
+
+    default void handleRule(Rule rule) {
+    }
+
+    default void finishRule(Rule rule) {
+    }
+
+
+    default void startBackground(Background background) {
+    }
+
+    default void handleBackground(Background background) {
+    }
+
+    default void finishBackground(Background background) {
+    }
+
+
+    default void startScenario(Scenario scenario) {
+    }
+
+    default void handleScenario(Scenario scenario) {
+    }
+
+    default void finishScenario(Scenario scenario) {
+    }
+
+
+    default void startStep(Step step) {
+    }
+
+    default void handleStep(Step step) {
+    }
+
+    default void finishStep(Step step) {
+    }
+
+
+    default void startExamples(Examples examples) {
+    }
+
+    default void handleExamples(Examples examples) {
+    }
+
+    default void finishExamples(Examples examples) {
+    }
+
+
+    default void startExamplesTableRow(TableRow tableRow) {
+    }
+
+    default void handleExamplesTableRow(TableRow tableRow) {
+    }
+
+    default void finishExamplesTableRow(TableRow tableRow) {
+    }
+
+
+    default void startDataTable(DataTable dataTable) {
+    }
+
+    default void handleDataTable(DataTable dataTable) {
+    }
+
+    default void finishDataTable(DataTable dataTable) {
+    }
+
+
+    default void startDataTableRow(TableRow tableRow) {
+    }
+
+    default void handleDataTableRow(TableRow tableRow) {
+    }
+
+    default void finishDataTableRow(TableRow tableRow) {
+    }
+
+
+    default void startDocString(DocString docString) {
+    }
+
+    default void handleDocString(DocString docString) {
+    }
+
+    default void finishDocString(DocString docString) {
+    }
+
+
+    default void startTags(List<Tag> tags) {
+    }
+
+    default void handleTags(List<Tag> tagLine) {
+    }
+
+    default void finishTags(List<Tag> tags) {
+    }
+
+
+    default void startDetachedComments(List<Comment> comments) {
+    }
+
+    default void handleDetachedComments(List<Comment> comments) {
 
     }
 
-    default void finishFeature(int level, Feature feature) {
+    default void finishDetachedComment(List<Comment> comments) {
     }
 
-    default void finishDescription(int level, String description) {
+
+    default void startComments(List<Comment> comments) {
     }
 
-    default void finishRule(int level, Rule rule) {
+    default void handleComments(List<Comment> comments) {
     }
 
-    default void finishBackground(int level, Background background) {
+    default void finishComments(List<Comment> comments) {
     }
 
-    default void finishScenario(int level, Scenario scenario) {
-    }
-
-    default void finishExamples(int level, Examples examples) {
-    }
-
-    default void finishDataTable(int level, DataTable dataTable) {
-    }
-
-    default void finishTags(int level, List<Tag> tags) {
-    }
-
-    default void finishDetachedCommentBlock(int level, List<Comment> comments) {
-
-    }
-
-    default void handleFeature(int level, Feature rule) {
-
-    }
-
-    default void handleLanguage(int level, String language) {
-
-    }
-
-    default void handleDescription(int level, String description) {
-    }
-
-    default void handleRule(int level, Rule rule) {
-    }
-
-    default void handleBackground(int level, Background background) {
-    }
-
-    default void handleScenario(int level, Scenario scenario) {
-    }
-
-    default void handleStep(int level, Step step) {
-    }
-
-    default void handleDataTable(int level, DataTable dataTable) {
-    }
-
-    default void handleDocString(int level, DocString docString) {
-    }
-
-    default void handleExamples(int level, Examples examples) {
-    }
-
-    default void handleTableRow(int level, TableRow tableRow) {
-    }
-
-    default void handleTagLine(int level, List<Tag> tagLine) {
-    }
-
-    default void handleCommentBlock(int level, List<Comment> comments) {
-
-    }
-
-    default void handleDetachedCommentBlock(int level, List<Comment> comments) {
-
-    }
 }

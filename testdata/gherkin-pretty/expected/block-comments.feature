@@ -63,13 +63,17 @@ Feature: With leading comments
       ##
 
       Examples: Example 1
+
         ##
         # A comment on this example
         ##
+
         | a |
+
         ##
         # A comment on this example
         ##
+
         | b |
 
       ##
@@ -77,13 +81,17 @@ Feature: With leading comments
       ##
 
       Examples: Example 2
+
         ##
         # A comment on this example
         ##
+
         | a |
+
         ##
         # A comment on this example
         ##
+
         | b |
 
 ##

@@ -23,10 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PrettyAcceptanceTest {
 
-    private static final GherkinParser parser = GherkinParser.builder()
-            .includePickles(false)
-            .build();
-
     private static List<Path> findFeatures(Path dir) throws IOException {
         List<Path> result;
         try (Stream<Path> paths = Files.list(dir)) {
@@ -69,7 +65,7 @@ class PrettyAcceptanceTest {
                 return;
             }
             var formatted = testCase.pretty.format(testCase.getActual());
-            Files.writeString(testCase.actual, formatted);
+            Files.writeString(testCase.expectedPath, formatted);
         }
     }
 
@@ -94,25 +90,30 @@ class PrettyAcceptanceTest {
     }
 
     static class TestCase {
+
+        private static final GherkinParser parser = GherkinParser.builder()
+                .includePickles(false)
+                .build();
+
         private final Pretty pretty;
         private final String name;
-        private final Path actual;
-        private final Path expectedDirectory;
+        private final Path actualPath;
+        private final Path expectedPath;
 
-        TestCase(Path actual, Path expectedDirectory, Pretty pretty) {
+        TestCase(Path actualPath, Path expectedDirectory, Pretty pretty) {
             this.pretty = pretty;
-            String fileName = actual.getFileName().toString();
+            String fileName = actualPath.getFileName().toString();
             this.name = fileName.substring(0, fileName.lastIndexOf("."));
-            this.actual = actual;
-            this.expectedDirectory = expectedDirectory;
+            this.actualPath = actualPath;
+            this.expectedPath = expectedDirectory.resolve(fileName);
         }
 
         GherkinDocument getActual() throws IOException {
-            return parseGherkinDocument(actual);
+            return parseGherkinDocument(actualPath);
         }
 
         String getExpected() throws IOException {
-            return readExpected(expectedDirectory, actual.getFileName());
+            return Files.readString(expectedPath);
         }
 
         @Override
@@ -126,10 +127,6 @@ class PrettyAcceptanceTest {
                     .findFirst()
                     .flatMap(Envelope::getGherkinDocument)
                     .orElseThrow();
-        }
-
-        private static String readExpected(Path expected, Path fileName) throws IOException {
-            return Files.readString(expected.resolve(fileName));
         }
     }
 }

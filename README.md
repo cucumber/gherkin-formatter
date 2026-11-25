@@ -55,13 +55,10 @@ Feature: Examples Tables
 ## Basic features
 
 In the default formatting:
- * Keywords are indented relative to their parent.
+ * Elements are indented relative to their parent.
+ * The feature keyword is surrounded by empty lines.
+ * The rule keyword is surrounded by empty lines.
  * Descriptions are surrounded by empty lines.
- * Descriptions are indented relative to their parent.
- * Comments are indented relative to their parent.
- * The features keyword is succeeded by an empty line.
- * Rules are surrounded by empty lines.
- * Doc string and data table arguments are indented relative to their parent.
  * Blank lines are converted to empty lines.
  * Consecutive empty lines are collapsed into a single empty line.
  * EOF is preceded by a new line.

@@ -21,6 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
+
 public final class Pretty {
 
     public Pretty() {
@@ -28,12 +30,16 @@ public final class Pretty {
     }
 
     public String format(GherkinDocument gherkinDocument) {
+        requireNonNull(gherkinDocument);
         var out = new ByteArrayOutputStream();
         formatTo(gherkinDocument, out);
         return out.toString(StandardCharsets.UTF_8);
     }
 
     public void formatTo(GherkinDocument gherkinDocument, OutputStream out) {
+        requireNonNull(gherkinDocument);
+        requireNonNull(out);
+
         try (var printWriter = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
             var handler = new PrettyHandler(printWriter);
             new GherkinDocumentWalker().walkGherkinDocument(gherkinDocument, handler);

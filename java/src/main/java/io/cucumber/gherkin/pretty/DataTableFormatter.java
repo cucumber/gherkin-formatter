@@ -16,7 +16,13 @@ import static java.util.Objects.requireNonNull;
 
 final class DataTableFormatter {
 
-    private static final Pattern IS_NUMBER_LIKE = Pattern.compile("^[0-9.,\\p{Sc}\\s]+$");
+    private static final Pattern IS_NUMBER_LIKE = Pattern.compile(
+            // Sign
+            "[-+]?" +
+                    // Significant
+                    "(?:\\d+(?:[,.]\\d+)*(?:[,.]\\d+)?|[,.]\\d+)" +
+                    // Exponent
+                    "(?:E[-+]?\\d+)?");
 
     private Map<TableRow, String[]> current = Collections.emptyMap();
     private int[] longestCellLengthInColumn = new int[0];

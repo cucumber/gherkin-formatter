@@ -129,7 +129,24 @@ For example:
 
 ### Numbers in DataTables
 
-TODO:
+Number like values in data and example tables  are right aligned.
+
+```gherkin
+...
+    Given a data table with numbers:
+      | text | numbers |
+      | a    |       1 |
+      | ab   |      10 |
+      | abc  |     100 |
+...
+```
+
+A value is number like it if matches the regex:
+
+```regexp
+[-+]?(?:\d+(?:[,.]\d+)*(?:[,.]\d+)?|[,.]\d+)(?:E[-+]?\d+)?`
+```
+
 
 ### Fullwidth characters in DataTables
 

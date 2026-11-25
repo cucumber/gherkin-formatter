@@ -142,11 +142,15 @@ class GherkinDocumentWalker {
     }
 
     private void walkSteps(int level, Background background, List<CommentBlock> remainingComments, Handler handler) {
-        background.getSteps().forEach(step -> walkStep(level + 1, step, remainingComments, handler));
+        walkSteps(level, background.getSteps(), remainingComments, handler);
     }
 
     private void walkSteps(int level, Scenario scenario, List<CommentBlock> remainingComments, Handler handler) {
-        scenario.getSteps().forEach(step -> walkStep(level + 1, step, remainingComments, handler));
+        walkSteps(level, scenario.getSteps(), remainingComments, handler);
+    }
+
+    private void walkSteps(int level, List<Step> steps, List<CommentBlock> remainingComments, Handler handler) {
+        steps.forEach(step -> walkStep(level + 1, step, remainingComments, handler));
     }
 
     private void walkStep(int level, Step step, List<CommentBlock> remainingComments, Handler handler) {

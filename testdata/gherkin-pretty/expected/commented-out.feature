@@ -1,13 +1,17 @@
-Feature: With leading comments
+Feature: With sections commented out
 
   Background: a background
     Given a step
 
   Scenario: A scenario
     Given a step
+    # And another step
+    And some other step
 
-   Scenario: A scenario
-     Given a step
+  # And yet another step
+
+  # Scenario: A scenario
+  #   Given a step
 
   Rule: A rule
 

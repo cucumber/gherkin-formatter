@@ -144,11 +144,6 @@ A value is number like it if matches the regex:
 [-+]?(?:\d+(?:[,.]\d+)*(?:[,.]\d+)?|[,.]\d+)(?:E[-+]?\d+)?`
 ```
 
-
-### Fullwidth characters in DataTables
-
-TODO:
-
 ## Usage and installation
 
 * [Java](./java/README.md)
@@ -156,5 +151,4 @@ TODO:
 ## Contributing
 
 Each language implementation validates itself against the examples in the
-`testdata` folder. See the different READMEs for more.
-information.
+`testdata` folder. See the different READMEs for more information.

@@ -159,9 +159,11 @@ class GherkinDocumentWalker {
     }
 
     private void walkDataTable(int level, DataTable dataTable, List<Comment> remainingComments, Handler handler) {
+        handler.startDataTable(level, dataTable);
         walkCommentsUpto(level, remainingComments, dataTable.getLocation(), handler);
         handler.handleDataTable(level, dataTable);
         walkDataTableRows(level, dataTable, remainingComments, handler);
+        handler.finishDataTable(level, dataTable);
     }
 
     private void walkDataTableRows(int level, DataTable dataTable, List<Comment> remainingComments, Handler handler) {
@@ -183,13 +185,15 @@ class GherkinDocumentWalker {
     }
 
     private void walkExamples(int level, Examples examples, List<Comment> remainingComments, Handler handler) {
-        handler.startExample(level, examples);
+        handler.startExamples(level, examples);
         walkExamplesTags(level, examples, remainingComments, handler);
         walkCommentsUpto(level, remainingComments, examples.getLocation(), handler);
         handler.handleExamples(level, examples);
         walkDescription(level, examples.getDescription(), handler);
-        examples.getTableHeader().ifPresent(tableRow -> walkExampleTableRow(level + 1, tableRow, remainingComments, handler));
-        examples.getTableBody().forEach(tableRow -> walkExampleTableRow(level + 1, tableRow, remainingComments, handler));
+        examples.getTableHeader().ifPresent(headerRow -> {
+            walkExampleTableRow(level + 1, headerRow, remainingComments, handler);
+            examples.getTableBody().forEach(bodyRow -> walkExampleTableRow(level + 1, bodyRow, remainingComments, handler));
+        });
         handler.finishExamples(level, examples);
     }
 

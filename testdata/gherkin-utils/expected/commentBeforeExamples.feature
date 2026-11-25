@@ -6,5 +6,5 @@ Feature: Comment before an Examples
     # then something happens
     Examples:
       | value |
-      | 1     |
-      | 2     |
+      |     1 |
+      |     2 |

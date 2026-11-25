@@ -12,8 +12,8 @@ Feature: hello
       | text | number |
       # comment3 is here
       # comment4 is here
-      | a    | 1      |
-      | ab   | 10     |
+      | a    |      1 |
+      | ab   |     10 |
       # comment5 is here
       # comment6 is here
-      | abc  | 100    |
+      | abc  |    100 |

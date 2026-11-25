@@ -32,7 +32,10 @@ interface Handler {
     default void startScenario(int level, Scenario scenario) {
     }
 
-    default void startExample(int level, Examples scenario) {
+    default void startExamples(int level, Examples examples) {
+    }
+
+    default void startDataTable(int level, DataTable dataTable) {
     }
 
     default void startTags(int level, List<Tag> tags){
@@ -53,7 +56,10 @@ interface Handler {
     default void finishScenario(int level, Scenario scenario) {
     }
 
-    default void finishExamples(int level, Examples scenario) {
+    default void finishExamples(int level, Examples examples) {
+    }
+
+    default void finishDataTable(int level, DataTable dataTable) {
     }
 
     default void finishTags(int level, List<Tag> tags){

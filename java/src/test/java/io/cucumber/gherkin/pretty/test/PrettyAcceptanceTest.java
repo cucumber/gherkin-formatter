@@ -79,7 +79,6 @@ class PrettyAcceptanceTest {
         }
     }
 
-
     @Nested
     class CompatibilityKit {
 

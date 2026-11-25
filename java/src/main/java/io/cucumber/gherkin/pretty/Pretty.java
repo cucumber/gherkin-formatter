@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 
 public final class Pretty {
 
-    public Pretty(){
+    public Pretty() {
 
     }
 
-    public String format(GherkinDocument gherkinDocument){
+    public String format(GherkinDocument gherkinDocument) {
         var pretty = new PrettyHandler();
         new GherkinDocumentWalker().walkGherkinDocument(gherkinDocument, pretty);
         return pretty.toString();
@@ -30,14 +30,11 @@ public final class Pretty {
 
     private static final class PrettyHandler implements Handler {
 
-        private static final String DOCSTRING_SEPARATOR = "\"\"\"";
-        private static final String ESCAPED_DOCSTRING_SEPARATOR = "\\\\\"\\\\\"\\\\\"";
-        private static final String DOCSTRING_ALTERNATIVE_SEPARATOR = "```";
-        private static final String ESCAPED_DOCSTRING_ALTERNATIVE_SEPARATOR = "\\\\`\\\\`\\\\`";
         private static final String INDENT = "  ";
 
         private final DataTableFormatter tableFormatter = new DataTableFormatter();
-        private final StringBuilder builder = new StringBuilder();
+        private final DocStringFormatter docStringFormatter = new DocStringFormatter();
+        private final StringBuilder out = new StringBuilder();
 
         private int consecutiveNewLinesWritten = 1; // empty document
 
@@ -116,38 +113,33 @@ public final class Pretty {
 
         @Override
         public void handleDocString(int level, DocString docString) {
-            writeLine(level, formatDocStringCommentOpen(docString));
-            docString.getContent()
-                    .lines()
-                    .map(docStringLine -> formatDocStringLine(docString, docStringLine))
-                    .forEach(line -> writeLine(level, line));
-            writeLine(level, formatDocStringCommentClose(docString));
-        }
-
-
-        private String formatDocStringLine(DocString docString, String docStringLine) {
-            if (docString.getDelimiter().equals(DOCSTRING_SEPARATOR)) {
-                return docStringLine.replaceAll(DOCSTRING_SEPARATOR, ESCAPED_DOCSTRING_SEPARATOR);
-            } else {
-                return docStringLine.replaceAll(DOCSTRING_ALTERNATIVE_SEPARATOR, ESCAPED_DOCSTRING_ALTERNATIVE_SEPARATOR);
-            }
-
+            docStringFormatter.formatTo(docString, line -> writeLine(level, line));
         }
 
         @Override
-        public void handleDataTable(int level, DataTable dataTable) {
-            tableFormatter.setCurrentTable(dataTable);
+        public void startDataTable(int level, DataTable dataTable) {
+            tableFormatter.setCurrent(dataTable);
         }
 
         @Override
-        public void startExample(int level, Examples scenario) {
+        public void finishDataTable(int level, DataTable dataTable) {
+            tableFormatter.clearCurrent();
+        }
+
+        @Override
+        public void startExamples(int level, Examples examples) {
             ensureEmptyLine();
+            tableFormatter.setCurrent(examples);
         }
 
         @Override
         public void handleExamples(int level, Examples examples) {
             writeLine(level, formatTitle(examples.getKeyword(), examples.getName()));
-            tableFormatter.setCurrentTable(examples);
+        }
+
+        @Override
+        public void finishExamples(int level, Examples examples) {
+            tableFormatter.clearCurrent();
         }
 
         @Override
@@ -169,8 +161,8 @@ public final class Pretty {
             if (line.isBlank()) {
                 writeLine();
             } else {
-                builder.append(INDENT.repeat(level));
-                builder.append(line);
+                out.append(INDENT.repeat(level));
+                out.append(line);
                 writeLine();
                 consecutiveNewLinesWritten = 0;
             }
@@ -184,7 +176,7 @@ public final class Pretty {
 
         private void writeLine() {
             // TODO: Which newline?
-            builder.append("\n");
+            out.append("\n");
             consecutiveNewLinesWritten++;
         }
 
@@ -204,17 +196,10 @@ public final class Pretty {
             return "%s%s".formatted(keyword, text);
         }
 
-        private String formatDocStringCommentOpen(DocString docString) {
-            return "%s%s".formatted(docString.getDelimiter(), docString.getMediaType().orElse(""));
-        }
-
-        private String formatDocStringCommentClose(DocString docString) {
-            return docString.getDelimiter();
-        }
 
         @Override
         public String toString() {
-            return builder.toString();
+            return out.toString();
         }
     }
 }

@@ -5,73 +5,82 @@ import io.cucumber.messages.types.Examples;
 import io.cucumber.messages.types.TableCell;
 import io.cucumber.messages.types.TableRow;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 
 final class DataTableFormatter {
 
+    private static final Pattern IS_NUMBER_LIKE = Pattern.compile("^[0-9.,\\p{Sc}\\s]+$");
+
+    private Map<TableRow, String[]> current = Collections.emptyMap();
     private int[] longestCellLengthInColumn = new int[0];
 
     DataTableFormatter() {
     }
 
-    void setCurrentTable(DataTable dataTable) {
-        longestCellLengthInColumn = findLongestCellLengthInColumn(dataTable);
+    void setCurrent(DataTable dataTable) {
+        var rendered = new HashMap<TableRow, String[]>();
+        dataTable.getRows().forEach(tableRow -> rendered.put(tableRow, render(tableRow)));
+        setCurrent(rendered);
     }
 
-
-    void setCurrentTable(Examples examples) {
-        longestCellLengthInColumn = findLongestCellLengthInColumn(examples);
+    void setCurrent(Examples examples) {
+        var rendered = new HashMap<TableRow, String[]>();
+        examples.getTableHeader().ifPresent(tableRow -> rendered.put(tableRow, render(tableRow)));
+        examples.getTableBody().forEach(tableRow -> rendered.put(tableRow, render(tableRow)));
+        setCurrent(rendered);
     }
 
-    private int[] findLongestCellLengthInColumn(DataTable table) {
+    void setCurrent(Map<TableRow, String[]> current) {
+        this.current = current;
+        this.longestCellLengthInColumn = findLongestCellLengthInColumn(current.values());
+    }
+
+    public void clearCurrent() {
+        this.current = Collections.emptyMap();
+        this.longestCellLengthInColumn = new int[0];
+    }
+
+    private int[] findLongestCellLengthInColumn(Collection<String[]> rows) {
         // datatables are always square and non-sparse.
-        var rows = table.getRows();
         if (rows.isEmpty()) {
             return new int[0];
         }
-        int width = rows.get(0).getCells().size();
+        int width = rows.iterator().next().length;
         int[] longestCellInColumnLength = new int[width];
-        for (TableRow row : rows) {
+        for (String[] row : rows) {
             findLongestCellInColumn(longestCellInColumnLength, row);
         }
         return longestCellInColumnLength;
     }
 
-    private int[] findLongestCellLengthInColumn(Examples table) {
-        // datatables are always square and non-sparse.
-        return table.getTableHeader().map(header -> {
-            List<TableCell> headerCells = header.getCells();
-            var width = headerCells.size();
-            int[] longestCellInColumnLength = new int[width];
-            findLongestCellInColumn(longestCellInColumnLength, header);
-            for (TableRow row : table.getTableBody()) {
-                findLongestCellInColumn(longestCellInColumnLength, row);
-            }
-
-            return longestCellInColumnLength;
-        }).orElse(new int[0]);
-    }
-
-    private void findLongestCellInColumn(int[] longestCellInColumnLength, TableRow row) {
-        int width = longestCellInColumnLength.length;
+    private void findLongestCellInColumn(int[] longestCellInColumnLength, String[] row) {
+        int width = row.length;
         for (int colIndex = 0; colIndex < width; colIndex++) {
             int current = longestCellInColumnLength[colIndex];
-            TableCell cell = row.getCells().get(colIndex);
-            int candidate = cellLength(renderCell(cell));
+            int candidate = cellLength(row[colIndex]);
             longestCellInColumnLength[colIndex] = Math.max(current, candidate);
         }
     }
 
     public void formatTableRowTo(TableRow tableRow, Consumer<String> lineBuilder) {
-        lineBuilder.accept(renderTableRowWithPadding(tableRow, longestCellLengthInColumn));
+        String[] cells = requireNonNull(current.get(tableRow));
+        lineBuilder.accept(renderTableRowWithPadding(cells, longestCellLengthInColumn));
     }
 
-    private String renderTableRowWithPadding(TableRow tableRow, int[] longestCellLengthInColumn) {
+    private String renderTableRowWithPadding(String[] cells, int[] longestCellLengthInColumn) {
         var builder = new StringBuilder("|");
-        var cells = tableRow.getCells();
-        for (int i = 0; i < cells.size(); i++) {
-            var cellText = renderCell(cells.get(i));
+        int length = cells.length;
+        for (int i = 0; i < length; i++) {
+            var cellText = cells[i];
+            // TODO: cellLength is calculated twice
             int padding = longestCellLengthInColumn[i] - cellLength(cellText);
             builder.append(renderCellWithPadding(cellText, padding));
             builder.append("|");
@@ -93,7 +102,12 @@ final class DataTableFormatter {
                 .sum();
     }
 
-    private String renderCell(TableCell cell) {
+
+    private String[] render(TableRow tableRow) {
+        return tableRow.getCells().stream().map(this::render).toArray(String[]::new);
+    }
+
+    private String render(TableCell cell) {
         var value = cell.getValue();
         int length = value.length();
         var builder = new StringBuilder(length);
@@ -109,9 +123,19 @@ final class DataTableFormatter {
         return builder.toString();
     }
 
-    private static String renderCellWithPadding(String cellText, int padding) {
-        // TODO: Number alignment
-        return " " + cellText +" ".repeat(padding) + " ";
+    private static String renderCellWithPadding(String cellText, int n) {
+        var padding = " ".repeat(n);
+        if (isNumberLike(cellText)) {
+            return " " + padding + cellText + " ";
+        }
+        return " " + cellText + padding + " ";
+    }
+
+    /**
+     * Matches numbers, currency, IP addresses and hopefully not much else.
+     */
+    private static boolean isNumberLike(String cellText) {
+        return IS_NUMBER_LIKE.matcher(cellText).matches();
     }
 
 }

@@ -34,6 +34,34 @@ class PrettyAcceptanceTest {
     }
 
     @Nested
+    class GherkinPretty {
+
+        static List<TestCase> acceptance() throws IOException {
+            var actualDirectory = Paths.get("..", "testdata", "gherkin-pretty", "src");
+            var expectedDirectory = Paths.get("..", "testdata", "gherkin-pretty", "expected");
+            return findFeatures(actualDirectory)
+                    .stream()
+                    .map(actual -> new TestCase(actual, expectedDirectory, new Pretty()))
+                    .toList();
+        }
+
+        @ParameterizedTest
+        @MethodSource("acceptance")
+        @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
+        void test(TestCase testCase) throws Exception {
+            assertEquals(testCase.getExpected(), testCase.pretty.format(testCase.getActual()));
+        }
+
+        @ParameterizedTest
+        @MethodSource("acceptance")
+        @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
+        void update(TestCase testCase) throws Exception {
+            var formatted = testCase.pretty.format(testCase.getActual());
+            Files.writeString(testCase.expectedPath, formatted);
+        }
+    }
+
+    @Nested
     class GherkinUtils {
 
         static List<TestCase> acceptance() throws IOException {
@@ -73,11 +101,11 @@ class PrettyAcceptanceTest {
     class CompatibilityKit {
 
         static List<TestCase> acceptance() throws IOException {
-            var testData = Paths.get("..", "testdata", "compatibility-kit", "src");
-            return findFeatures(testData)
+            // Tests a round trip
+            var expectedAndActual = Paths.get("..", "testdata", "compatibility-kit", "src");
+            return findFeatures(expectedAndActual)
                     .stream()
-                    // Tests a round trip
-                    .map(actual -> new TestCase(actual, testData, new Pretty()))
+                    .map(actual -> new TestCase(actual, expectedAndActual, new Pretty()))
                     .toList();
         }
 

@@ -1,17 +1,15 @@
 # Acceptance test data
 
 The pretty formatter uses the examples from the [Cucumber Compatibility Kit](https://github.com/cucumber/compatibility-kit)
-for acceptance testing. These examples consist of `.ndjson` files created by
+for acceptance testing. These examples consist of `.feature` files created by
 the CCK's reference implementation.
 
-* The `.ndjson` files are copied in by running `npm install`.
-* The expected `.log` files are created by running a test that updates them.
+* The `.feature` files are copied in by running `npm install`.
 
-We ensure the `.ndjson` files stay up to date by running `npm install` in CI
+We ensure the `.feature` files stay up to date by running `npm install` in CI
 and verifying nothing changed. 
 
-Should there be changes, the Java or Javascript tests can be used to update the
-expected data.
+Should there be changes, please reformat the features in the CCK.
  
 ```shell
 cd java

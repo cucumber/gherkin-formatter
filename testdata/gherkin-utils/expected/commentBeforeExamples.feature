@@ -4,6 +4,7 @@ Feature: Comment before an Examples
     Given the <value> minimalism
 
     # then something happens
+
     Examples:
       | value |
       |     1 |

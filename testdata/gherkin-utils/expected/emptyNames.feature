@@ -1,4 +1,3 @@
-# before Feature
 Feature:
 
   Background:

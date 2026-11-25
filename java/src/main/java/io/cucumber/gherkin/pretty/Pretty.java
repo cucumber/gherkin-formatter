@@ -34,9 +34,11 @@ public final class Pretty {
 
         private final DataTableFormatter tableFormatter = new DataTableFormatter();
         private final DocStringFormatter docStringFormatter = new DocStringFormatter();
+        private final CommentFormatter commentFormatter = new CommentFormatter();
         private final StringBuilder out = new StringBuilder();
 
         private int consecutiveNewLinesWritten = 1; // empty document
+        private int enqueuedEmptyLines = 0;
 
         @Override
         public void startFeature(int level, Feature feature) {
@@ -45,13 +47,11 @@ public final class Pretty {
 
         @Override
         public void handleFeature(int level, Feature feature) {
-            handleLanguage(level, feature);
             writeLine(level, formatTitle(feature.getKeyword(), feature.getName()));
         }
 
-        private void handleLanguage(int level, Feature feature) {
-            // TODO: Pull up.
-            var language = feature.getLanguage();
+        @Override
+        public void handleLanguage(int level, String language) {
             if ("en".equals(language)) {
                 return;
             }
@@ -153,19 +153,37 @@ public final class Pretty {
         }
 
         @Override
-        public void handleComment(int level, Comment comment) {
-            writeLine(level, formatComment(comment));
+        public void handleCommentBlock(int level, List<Comment> comments) {
+            commentFormatter.formatCommentBlockTo(comments, comment -> writeLine(level, comment));
+        }
+
+        @Override
+        public void startDetachedCommentBlock(int level, List<Comment> comments) {
+            ensureEmptyLine();
+        }
+
+        @Override
+        public void handleDetachedCommentBlock(int level, List<Comment> comments) {
+            commentFormatter.formatCommentBlockTo(comments, comment -> writeLine(level, comment));
+        }
+
+        @Override
+        public void finishDetachedCommentBlock(int level, List<Comment> comments) {
+            enqueueEmptyLine();
         }
 
         private void writeLine(int level, String line) {
             if (line.isBlank()) {
                 writeLine();
-            } else {
-                out.append(INDENT.repeat(level));
-                out.append(line);
-                writeLine();
-                consecutiveNewLinesWritten = 0;
+                return;
             }
+            if (enqueuedEmptyLines > 0) {
+                writeLine();
+            }
+            out.append(INDENT.repeat(level));
+            out.append(line);
+            writeLine();
+            consecutiveNewLinesWritten = 0;
         }
 
         private void ensureEmptyLine() {
@@ -174,16 +192,17 @@ public final class Pretty {
             }
         }
 
+        private void enqueueEmptyLine() {
+            enqueuedEmptyLines++;
+        }
+
         private void writeLine() {
             // TODO: Which newline?
             out.append("\n");
             consecutiveNewLinesWritten++;
+            enqueuedEmptyLines = 0;
         }
 
-        private static String formatComment(Comment comment) {
-            var trimmed = comment.getText().trim().substring(1).trim();
-            return "# " + trimmed;
-        }
 
         private static String formatTitle(String keyword, String name) {
             if (name.isEmpty()) {

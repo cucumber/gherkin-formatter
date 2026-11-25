@@ -37,7 +37,11 @@ interface Handler {
     default void startDataTable(int level, DataTable dataTable) {
     }
 
-    default void startTags(int level, List<Tag> tags){
+    default void startTags(int level, List<Tag> tags) {
+    }
+
+    default void startDetachedCommentBlock(int level, List<Comment> comments) {
+
     }
 
     default void finishFeature(int level, Feature feature) {
@@ -61,10 +65,19 @@ interface Handler {
     default void finishDataTable(int level, DataTable dataTable) {
     }
 
-    default void finishTags(int level, List<Tag> tags){
+    default void finishTags(int level, List<Tag> tags) {
+    }
+
+    default void finishDetachedCommentBlock(int level, List<Comment> comments) {
+
     }
 
     default void handleFeature(int level, Feature rule) {
+
+    }
+
+    default void handleLanguage(int level, String language) {
+
     }
 
     default void handleDescription(int level, String description) {
@@ -97,7 +110,11 @@ interface Handler {
     default void handleTagLine(int level, List<Tag> tagLine) {
     }
 
-    default void handleComment(int level, Comment comment) {
+    default void handleCommentBlock(int level, List<Comment> comments) {
+
     }
 
+    default void handleDetachedCommentBlock(int level, List<Comment> comments) {
+
+    }
 }

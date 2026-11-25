@@ -1,5 +1,4 @@
-# before Feature
-Feature:   
+Feature:
 
   Background:   
 

@@ -6,4 +6,5 @@ Feature: hello
     # some comment in the scenario
     # another line in the comment in the scenario
     Given a a <text> and a <number>
+
 # i am a comment at the end of the file.

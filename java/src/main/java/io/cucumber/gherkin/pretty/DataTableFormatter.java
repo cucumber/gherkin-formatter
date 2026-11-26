@@ -126,6 +126,7 @@ final class DataTableFormatter {
         for (int i = 0; i < length; ++i) {
             char c = value.charAt(i);
             builder.append(switch (c) {
+                // TODO: Escape characters that don't escape anything don't have to be escaped
                 case '\\' -> "\\\\";
                 case '\n' -> "\\n";
                 case '|' -> "\\|";

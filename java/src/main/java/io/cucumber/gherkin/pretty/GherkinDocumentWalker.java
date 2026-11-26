@@ -26,8 +26,17 @@ import static java.util.stream.Collectors.toList;
 /**
  * Utility to walk a Gherkin document.
  *
- * <p>The matching methods of the {@link Handler} are called as the walker
- * traverses the document.
+ * <p>The walker uses an event based model. The matching {@code start*},
+ * {@code handle*}, and {@code finish*} methods of the {@link Handler} are
+ * called as the walker traverses the document.
+ *
+ * <p>Tags are treated on a per-line basis,
+ * {@link Handler#handleTags(Object, List)} is called for each set of tags on
+ * the same line.
+ *
+ * <p>Comments lines are treated on a block by block basis. A block is a set
+ * of continues comment lines, {@link Handler#handleComments(Object, List)}
+ * is invoked once for each block.
  *
  * <p>In addition to the elements of the {@link GherkinDocument} the walker
  * distinguishes attached and detached comment blocks. Attached comment blocks
@@ -60,7 +69,7 @@ public final class GherkinDocumentWalker<Context, Consumer> {
         walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(feature));
         handler.startFeature(context, feature);
         walkFeatureLanguage(context, feature);
-        walkFeatureTags(context, feature, remainingComments);
+        walkTags(context, feature.getTags(), remainingComments);
         walkCommentsUpto(context, remainingComments, feature.getLocation());
         handler.handleFeature(context, feature);
         walkDescription(context, feature.getDescription());
@@ -84,10 +93,6 @@ public final class GherkinDocumentWalker<Context, Consumer> {
         handler.finishDescription(context, description);
     }
 
-    private void walkFeatureTags(Context context, Feature feature, List<CommentBlock> remainingComments) {
-        walkTags(context, feature.getTags(), remainingComments);
-    }
-
     private void walkFeatureChildren(Context context, Feature feature, List<CommentBlock> remainingComments) {
         feature.getChildren().forEach(featureChild -> walkFeatureChild(context, featureChild, remainingComments));
     }
@@ -107,16 +112,12 @@ public final class GherkinDocumentWalker<Context, Consumer> {
     private void walkRule(Context context, Rule rule, List<CommentBlock> remainingComments) {
         walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(rule));
         handler.startRule(context, rule);
-        walkTagRuleTags(context, rule, remainingComments);
+        walkTags(context, rule.getTags(), remainingComments);
         walkCommentsUpto(context, remainingComments, rule.getLocation());
         handler.handleRule(context, rule);
         walkDescription(context, rule.getDescription());
         walkRuleChildren(context, rule, remainingComments);
         handler.finishRule(context, rule);
-    }
-
-    private void walkTagRuleTags(Context context, Rule rule, List<CommentBlock> remainingComments) {
-        walkTags(context, rule.getTags(), remainingComments);
     }
 
     private void walkRuleChildren(Context context, Rule rule, List<CommentBlock> remainingComments) {
@@ -138,32 +139,20 @@ public final class GherkinDocumentWalker<Context, Consumer> {
         walkCommentsUpto(context, remainingComments, background.getLocation());
         handler.handleBackground(context, background);
         walkDescription(context, background.getDescription());
-        walkSteps(context, background, remainingComments);
+        walkSteps(context, background.getSteps(), remainingComments);
         handler.finishBackground(context, background);
     }
 
     private void walkScenario(Context context, Scenario scenario, List<CommentBlock> remainingComments) {
         walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(scenario));
         handler.startScenario(context, scenario);
-        walkScenarioTags(context, scenario, remainingComments);
+        walkTags(context, scenario.getTags(), remainingComments);
         walkCommentsUpto(context, remainingComments, scenario.getLocation());
         handler.handleScenario(context, scenario);
         walkDescription(context, scenario.getDescription());
-        walkSteps(context, scenario, remainingComments);
+        walkSteps(context, scenario.getSteps(), remainingComments);
         walkExamples(context, scenario, remainingComments);
         handler.finishScenario(context, scenario);
-    }
-
-    private void walkScenarioTags(Context context, Scenario scenario, List<CommentBlock> remainingComments) {
-        walkTags(context, scenario.getTags(), remainingComments);
-    }
-
-    private void walkSteps(Context context, Background background, List<CommentBlock> remainingComments) {
-        walkSteps(context, background.getSteps(), remainingComments);
-    }
-
-    private void walkSteps(Context context, Scenario scenario, List<CommentBlock> remainingComments) {
-        walkSteps(context, scenario.getSteps(), remainingComments);
     }
 
     private void walkSteps(Context context, List<Step> steps, List<CommentBlock> remainingComments) {
@@ -230,7 +219,7 @@ public final class GherkinDocumentWalker<Context, Consumer> {
     private void walkExamples(Context context, Examples examples, List<CommentBlock> remainingComments) {
         walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(examples));
         handler.startExamples(context, examples);
-        walkExamplesTags(context, examples, remainingComments);
+        walkTags(context, examples.getTags(), remainingComments);
         walkCommentsUpto(context, remainingComments, examples.getLocation());
         handler.handleExamples(context, examples);
         walkDescription(context, examples.getDescription());
@@ -239,10 +228,6 @@ public final class GherkinDocumentWalker<Context, Consumer> {
             examples.getTableBody().forEach(bodyRow -> walkExampleTableRow(context, bodyRow, remainingComments));
         });
         handler.finishExamples(context, examples);
-    }
-
-    private void walkExamplesTags(Context context, Examples examples, List<CommentBlock> remainingComments) {
-        walkTags(context, examples.getTags(), remainingComments);
     }
 
     private void walkExampleTableRow(Context context, TableRow tableRow, List<CommentBlock> remainingComments) {
@@ -314,7 +299,7 @@ public final class GherkinDocumentWalker<Context, Consumer> {
     /**
      * A state free handler for events emitted by the {@link GherkinDocumentWalker}.
      *
-     * The instance of {@code Context} should be used to store state. The
+     * <p>The instance of {@code Context} should be used to store state. The
      * {@code Output} instance should be used to output any results to.
      *
      * @param <Context> type of the object that stores the state for this

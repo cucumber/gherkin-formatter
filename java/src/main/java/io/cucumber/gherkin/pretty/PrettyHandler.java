@@ -68,6 +68,9 @@ final class PrettyHandler implements Handler {
 
     @Override
     public void handleDescription(String description) {
+        // TODO: Description are multi line but don't have a location attached
+        // or a line abstraction in Gherkin. This means comments around the
+        // location are not accurately positioned.
         description.stripTrailing().stripIndent().lines()
                 .map(String::stripTrailing)
                 .forEach(this::writeLine);

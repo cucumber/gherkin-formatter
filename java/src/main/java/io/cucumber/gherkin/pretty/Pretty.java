@@ -6,8 +6,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -29,16 +29,18 @@ public final class Pretty {
         requireNonNull(gherkinDocument);
         var out = new ByteArrayOutputStream();
         formatTo(gherkinDocument, out);
-        return out.toString(StandardCharsets.UTF_8);
+        return out.toString(UTF_8);
     }
 
     public void formatTo(GherkinDocument gherkinDocument, OutputStream out) {
         requireNonNull(gherkinDocument);
         requireNonNull(out);
 
-        try (var printWriter = new PrintWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8))) {
-            var handler = new PrettyHandler(configuration, printWriter);
-            new GherkinDocumentWalker().walkGherkinDocument(gherkinDocument, handler);
+        var handler = new PrettyHandler(configuration);
+        var documentWalker = new GherkinDocumentWalker<>(handler);
+
+        try (var printWriter = new PrintWriter(new OutputStreamWriter(out, UTF_8))) {
+            documentWalker.walkGherkinDocument(gherkinDocument, printWriter);
         }
     }
 

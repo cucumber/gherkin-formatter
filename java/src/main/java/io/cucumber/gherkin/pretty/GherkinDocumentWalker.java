@@ -36,147 +36,150 @@ import static java.util.stream.Collectors.toList;
  * <p>If the line immediately after a comment block is not empty the comment
  * block is considered attached to that line. Otherwise, it is detached.
  */
-public final class GherkinDocumentWalker {
+public final class GherkinDocumentWalker<Context, Consumer> {
 
-    public GherkinDocumentWalker(){
+    private final Handler<Context, Consumer> handler;
 
+    public GherkinDocumentWalker(Handler<Context, Consumer> handler) {
+        this.handler = handler;
     }
 
-    public void walkGherkinDocument(GherkinDocument gherkinDocument, Handler handler) {
+    public void walkGherkinDocument(GherkinDocument gherkinDocument, Consumer consumer) {
+        var context = handler.createContext(consumer);
         var remainingComments = groupByCommentBlock(gherkinDocument.getComments());
-        handler.startGherkinDocument(gherkinDocument);
-        handler.handleGherkinDocument(gherkinDocument);
+        handler.startGherkinDocument(context, gherkinDocument);
+        handler.handleGherkinDocument(context, gherkinDocument);
         gherkinDocument.getFeature().ifPresent(feature -> {
-            walkFeature(feature, remainingComments, handler);
+            walkFeature(context, feature, remainingComments);
         });
-        remainingComments.forEach(comment -> walkDetachedComment(comment, handler));
-        handler.finishGherkinDocument(gherkinDocument);
+        remainingComments.forEach(comment -> walkDetachedComment(context, comment));
+        handler.finishGherkinDocument(context, gherkinDocument);
     }
 
-    private void walkFeature(Feature feature, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, GherkinDocumentUtil.startOf(feature), handler);
-        handler.startFeature(feature);
-        walkFeatureLanguage(feature, handler);
-        walkFeatureTags(feature, remainingComments, handler);
-        walkCommentsUpto(remainingComments, feature.getLocation(), handler);
-        handler.handleFeature(feature);
-        walkDescription(feature.getDescription(), handler);
-        walkFeatureChildren(feature, remainingComments, handler);
-        handler.finishFeature(feature);
+    private void walkFeature(Context context, Feature feature, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(feature));
+        handler.startFeature(context, feature);
+        walkFeatureLanguage(context, feature);
+        walkFeatureTags(context, feature, remainingComments);
+        walkCommentsUpto(context, remainingComments, feature.getLocation());
+        handler.handleFeature(context, feature);
+        walkDescription(context, feature.getDescription());
+        walkFeatureChildren(context, feature, remainingComments);
+        handler.finishFeature(context, feature);
     }
 
-    private void walkFeatureLanguage(Feature feature, Handler handler) {
+    private void walkFeatureLanguage(Context context, Feature feature) {
         var language = feature.getLanguage();
-        handler.startLanguage(language);
-        handler.handleLanguage(language);
-        handler.finishLanguage(language);
+        handler.startLanguage(context, language);
+        handler.handleLanguage(context, language);
+        handler.finishLanguage(context, language);
     }
 
-    private void walkDescription(String description, Handler handler) {
+    private void walkDescription(Context context, String description) {
         if (description.isBlank()) {
             return;
         }
-        handler.startDescription(description);
-        handler.handleDescription(description);
-        handler.finishDescription(description);
+        handler.startDescription(context, description);
+        handler.handleDescription(context, description);
+        handler.finishDescription(context, description);
     }
 
-    private void walkFeatureTags(Feature feature, List<CommentBlock> remainingComments, Handler handler) {
-        walkTags(feature.getTags(), remainingComments, handler);
+    private void walkFeatureTags(Context context, Feature feature, List<CommentBlock> remainingComments) {
+        walkTags(context, feature.getTags(), remainingComments);
     }
 
-    private void walkFeatureChildren(Feature feature, List<CommentBlock> remainingComments, Handler handler) {
-        feature.getChildren().forEach(featureChild -> walkFeatureChild(featureChild, remainingComments, handler));
+    private void walkFeatureChildren(Context context, Feature feature, List<CommentBlock> remainingComments) {
+        feature.getChildren().forEach(featureChild -> walkFeatureChild(context, featureChild, remainingComments));
     }
 
-    private void walkFeatureChild(FeatureChild child, List<CommentBlock> remainingComments, Handler handler) {
+    private void walkFeatureChild(Context context, FeatureChild child, List<CommentBlock> remainingComments) {
         child.getRule().ifPresent(rule -> {
-            walkRule(rule, remainingComments, handler);
+            walkRule(context, rule, remainingComments);
         });
         child.getBackground().ifPresent(background -> {
-            walkBackground(background, remainingComments, handler);
+            walkBackground(context, background, remainingComments);
         });
         child.getScenario().ifPresent(scenario -> {
-            walkScenario(scenario, remainingComments, handler);
+            walkScenario(context, scenario, remainingComments);
         });
     }
 
-    private void walkRule(Rule rule, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, GherkinDocumentUtil.startOf(rule), handler);
-        handler.startRule(rule);
-        walkTagRuleTags(rule, remainingComments, handler);
-        walkCommentsUpto(remainingComments, rule.getLocation(), handler);
-        handler.handleRule(rule);
-        walkDescription(rule.getDescription(), handler);
-        walkRuleChildren(rule, remainingComments, handler);
-        handler.finishRule(rule);
+    private void walkRule(Context context, Rule rule, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(rule));
+        handler.startRule(context, rule);
+        walkTagRuleTags(context, rule, remainingComments);
+        walkCommentsUpto(context, remainingComments, rule.getLocation());
+        handler.handleRule(context, rule);
+        walkDescription(context, rule.getDescription());
+        walkRuleChildren(context, rule, remainingComments);
+        handler.finishRule(context, rule);
     }
 
-    private void walkTagRuleTags(Rule rule, List<CommentBlock> remainingComments, Handler handler) {
-        walkTags(rule.getTags(), remainingComments, handler);
+    private void walkTagRuleTags(Context context, Rule rule, List<CommentBlock> remainingComments) {
+        walkTags(context, rule.getTags(), remainingComments);
     }
 
-    private void walkRuleChildren(Rule rule, List<CommentBlock> remainingComments, Handler handler) {
-        rule.getChildren().forEach(featureChild -> walkRuleChild(featureChild, remainingComments, handler));
+    private void walkRuleChildren(Context context, Rule rule, List<CommentBlock> remainingComments) {
+        rule.getChildren().forEach(featureChild -> walkRuleChild(context, featureChild, remainingComments));
     }
 
-    private void walkRuleChild(RuleChild child, List<CommentBlock> remainingComments, Handler handler) {
+    private void walkRuleChild(Context context, RuleChild child, List<CommentBlock> remainingComments) {
         child.getBackground().ifPresent(background -> {
-            walkBackground(background, remainingComments, handler);
+            walkBackground(context, background, remainingComments);
         });
         child.getScenario().ifPresent(scenario -> {
-            walkScenario(scenario, remainingComments, handler);
+            walkScenario(context, scenario, remainingComments);
         });
     }
 
-    private void walkBackground(Background background, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, GherkinDocumentUtil.startOf(background), handler);
-        handler.startBackground(background);
-        walkCommentsUpto(remainingComments, background.getLocation(), handler);
-        handler.handleBackground(background);
-        walkDescription(background.getDescription(), handler);
-        walkSteps(background, remainingComments, handler);
-        handler.finishBackground(background);
+    private void walkBackground(Context context, Background background, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(background));
+        handler.startBackground(context, background);
+        walkCommentsUpto(context, remainingComments, background.getLocation());
+        handler.handleBackground(context, background);
+        walkDescription(context, background.getDescription());
+        walkSteps(context, background, remainingComments);
+        handler.finishBackground(context, background);
     }
 
-    private void walkScenario(Scenario scenario, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, GherkinDocumentUtil.startOf(scenario), handler);
-        handler.startScenario(scenario);
-        walkScenarioTags(scenario, remainingComments, handler);
-        walkCommentsUpto(remainingComments, scenario.getLocation(), handler);
-        handler.handleScenario(scenario);
-        walkDescription(scenario.getDescription(), handler);
-        walkSteps(scenario, remainingComments, handler);
-        walkExamples(scenario, remainingComments, handler);
-        handler.finishScenario(scenario);
+    private void walkScenario(Context context, Scenario scenario, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(scenario));
+        handler.startScenario(context, scenario);
+        walkScenarioTags(context, scenario, remainingComments);
+        walkCommentsUpto(context, remainingComments, scenario.getLocation());
+        handler.handleScenario(context, scenario);
+        walkDescription(context, scenario.getDescription());
+        walkSteps(context, scenario, remainingComments);
+        walkExamples(context, scenario, remainingComments);
+        handler.finishScenario(context, scenario);
     }
 
-    private void walkScenarioTags(Scenario scenario, List<CommentBlock> remainingComments, Handler handler) {
-        walkTags(scenario.getTags(), remainingComments, handler);
+    private void walkScenarioTags(Context context, Scenario scenario, List<CommentBlock> remainingComments) {
+        walkTags(context, scenario.getTags(), remainingComments);
     }
 
-    private void walkSteps(Background background, List<CommentBlock> remainingComments, Handler handler) {
-        walkSteps(background.getSteps(), remainingComments, handler);
+    private void walkSteps(Context context, Background background, List<CommentBlock> remainingComments) {
+        walkSteps(context, background.getSteps(), remainingComments);
     }
 
-    private void walkSteps(Scenario scenario, List<CommentBlock> remainingComments, Handler handler) {
-        walkSteps(scenario.getSteps(), remainingComments, handler);
+    private void walkSteps(Context context, Scenario scenario, List<CommentBlock> remainingComments) {
+        walkSteps(context, scenario.getSteps(), remainingComments);
     }
 
-    private void walkSteps(List<Step> steps, List<CommentBlock> remainingComments, Handler handler) {
-        steps.forEach(step -> walkStep(step, remainingComments, handler));
+    private void walkSteps(Context context, List<Step> steps, List<CommentBlock> remainingComments) {
+        steps.forEach(step -> walkStep(context, step, remainingComments));
     }
 
-    private void walkStep(Step step, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, GherkinDocumentUtil.startOf(step), handler);
-        handler.startStep(step);
-        walkCommentsUpto(remainingComments, step.getLocation(), handler);
-        handler.handleStep(step);
-        walkStepArguments(step, remainingComments, handler);
-        handler.finishStep(step);
+    private void walkStep(Context context, Step step, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(step));
+        handler.startStep(context, step);
+        walkCommentsUpto(context, remainingComments, step.getLocation());
+        handler.handleStep(context, step);
+        walkStepArguments(context, step, remainingComments);
+        handler.finishStep(context, step);
     }
 
-    private void walkStepArguments(Step step, List<CommentBlock> remainingComments, Handler handler) {
+    private void walkStepArguments(Context context, Step step, List<CommentBlock> remainingComments) {
         var dataTable = step.getDataTable();
         var docString = step.getDocString();
 
@@ -184,109 +187,109 @@ public final class GherkinDocumentWalker {
         var docStringLocation = docString.map(DocString::getLocation).map(Location::getLine).orElse(-1);
 
         if (dataTableLocation < docStringLocation) {
-            dataTable.ifPresent(it -> walkDataTable(it, remainingComments, handler));
-            docString.ifPresent(it -> walkDocString(it, remainingComments, handler));
+            dataTable.ifPresent(it -> walkDataTable(context, it, remainingComments));
+            docString.ifPresent(it -> walkDocString(context, it, remainingComments));
         } else {
-            docString.ifPresent(it -> walkDocString(it, remainingComments, handler));
-            dataTable.ifPresent(it -> walkDataTable(it, remainingComments, handler));
+            docString.ifPresent(it -> walkDocString(context, it, remainingComments));
+            dataTable.ifPresent(it -> walkDataTable(context, it, remainingComments));
         }
     }
 
-    private void walkDataTable(DataTable dataTable, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, GherkinDocumentUtil.startOf(dataTable), handler);
-        handler.startDataTable(dataTable);
-        walkCommentsUpto(remainingComments, dataTable.getLocation(), handler);
-        handler.handleDataTable(dataTable);
-        walkDataTableRows(dataTable, remainingComments, handler);
-        handler.finishDataTable(dataTable);
+    private void walkDataTable(Context context, DataTable dataTable, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(dataTable));
+        handler.startDataTable(context, dataTable);
+        walkCommentsUpto(context, remainingComments, dataTable.getLocation());
+        handler.handleDataTable(context, dataTable);
+        walkDataTableRows(context, dataTable, remainingComments);
+        handler.finishDataTable(context, dataTable);
     }
 
-    private void walkDataTableRows(DataTable dataTable, List<CommentBlock> remainingComments, Handler handler) {
-        dataTable.getRows().forEach(tableRow -> walkDatTableRow(tableRow, remainingComments, handler));
+    private void walkDataTableRows(Context context, DataTable dataTable, List<CommentBlock> remainingComments) {
+        dataTable.getRows().forEach(tableRow -> walkDatTableRow(context, tableRow, remainingComments));
     }
 
-    private void walkDatTableRow(TableRow tableRow, List<CommentBlock> remainingComments, Handler handler) {
-        walkCommentsUpto(remainingComments, tableRow.getLocation(), handler);
-        handler.startDataTableRow(tableRow);
-        handler.handleDataTableRow(tableRow);
-        handler.finishDataTableRow(tableRow);
+    private void walkDatTableRow(Context context, TableRow tableRow, List<CommentBlock> remainingComments) {
+        walkCommentsUpto(context, remainingComments, tableRow.getLocation());
+        handler.startDataTableRow(context, tableRow);
+        handler.handleDataTableRow(context, tableRow);
+        handler.finishDataTableRow(context, tableRow);
     }
 
-    private void walkDocString(DocString docString, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, GherkinDocumentUtil.startOf(docString), handler);
-        handler.startDocString(docString);
-        walkCommentsUpto(remainingComments, docString.getLocation(), handler);
-        handler.handleDocString(docString);
-        handler.finishDocString(docString);
+    private void walkDocString(Context context, DocString docString, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(docString));
+        handler.startDocString(context, docString);
+        walkCommentsUpto(context, remainingComments, docString.getLocation());
+        handler.handleDocString(context, docString);
+        handler.finishDocString(context, docString);
     }
 
-    private void walkExamples(Scenario scenario, List<CommentBlock> remainingComments, Handler handler) {
-        scenario.getExamples().forEach(examples -> walkExamples(examples, remainingComments, handler));
+    private void walkExamples(Context context, Scenario scenario, List<CommentBlock> remainingComments) {
+        scenario.getExamples().forEach(examples -> walkExamples(context, examples, remainingComments));
     }
 
-    private void walkExamples(Examples examples, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, GherkinDocumentUtil.startOf(examples), handler);
-        handler.startExamples(examples);
-        walkExamplesTags(examples, remainingComments, handler);
-        walkCommentsUpto(remainingComments, examples.getLocation(), handler);
-        handler.handleExamples(examples);
-        walkDescription(examples.getDescription(), handler);
+    private void walkExamples(Context context, Examples examples, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, GherkinDocumentUtil.startOf(examples));
+        handler.startExamples(context, examples);
+        walkExamplesTags(context, examples, remainingComments);
+        walkCommentsUpto(context, remainingComments, examples.getLocation());
+        handler.handleExamples(context, examples);
+        walkDescription(context, examples.getDescription());
         examples.getTableHeader().ifPresent(headerRow -> {
-            walkExampleTableRow(headerRow, remainingComments, handler);
-            examples.getTableBody().forEach(bodyRow -> walkExampleTableRow(bodyRow, remainingComments, handler));
+            walkExampleTableRow(context, headerRow, remainingComments);
+            examples.getTableBody().forEach(bodyRow -> walkExampleTableRow(context, bodyRow, remainingComments));
         });
-        handler.finishExamples(examples);
+        handler.finishExamples(context, examples);
     }
 
-    private void walkExamplesTags(Examples examples, List<CommentBlock> remainingComments, Handler handler) {
-        walkTags(examples.getTags(), remainingComments, handler);
+    private void walkExamplesTags(Context context, Examples examples, List<CommentBlock> remainingComments) {
+        walkTags(context, examples.getTags(), remainingComments);
     }
 
-    private void walkExampleTableRow(TableRow tableRow, List<CommentBlock> remainingComments, Handler handler) {
-        walkDetachedCommentsUpTo(remainingComments, tableRow.getLocation(), handler);
-        handler.startExamplesTableRow(tableRow);
-        walkCommentsUpto(remainingComments, tableRow.getLocation(), handler);
-        handler.handleExamplesTableRow(tableRow);
-        handler.finishExamplesTableRow(tableRow);
+    private void walkExampleTableRow(Context context, TableRow tableRow, List<CommentBlock> remainingComments) {
+        walkDetachedCommentsUpTo(context, remainingComments, tableRow.getLocation());
+        handler.startExamplesTableRow(context, tableRow);
+        walkCommentsUpto(context, remainingComments, tableRow.getLocation());
+        handler.handleExamplesTableRow(context, tableRow);
+        handler.finishExamplesTableRow(context, tableRow);
     }
 
-    private void walkTags(List<Tag> tags, List<CommentBlock> remainingComments, Handler handler) {
+    private void walkTags(Context context, List<Tag> tags, List<CommentBlock> remainingComments) {
         if (tags.isEmpty()) {
             return;
         }
-        handler.startTags(tags);
+        handler.startTags(context, tags);
         var tagsByLocation = tags.stream() //
                 .collect(groupingBy(tag -> tag.getLocation().getLine(), LinkedHashMap::new, toList()));
         tagsByLocation.forEach((integer, tagOnSameLine) -> {
             var location = tagOnSameLine.get(0).getLocation();
-            walkCommentsUpto(remainingComments, location, handler);
-            handler.handleTags(tagOnSameLine);
+            walkCommentsUpto(context, remainingComments, location);
+            handler.handleTags(context, tagOnSameLine);
         });
-        handler.finishTags(tags);
+        handler.finishTags(context, tags);
     }
 
-    private void walkCommentsUpto(List<CommentBlock> remainingComments, Location upTo, Handler handler) {
+    private void walkCommentsUpto(Context context, List<CommentBlock> remainingComments, Location upTo) {
         int upToLine = upTo.getLine();
         var iterator = remainingComments.iterator();
         while (iterator.hasNext()) {
             var commentBlock = iterator.next();
             if (commentBlock.start().getLine() < upToLine) {
                 iterator.remove();
-                walkComment(commentBlock, handler);
+                walkComment(context, commentBlock);
             } else {
                 return;
             }
         }
     }
 
-    private void walkComment(CommentBlock block, Handler handler) {
+    private void walkComment(Context context, CommentBlock block) {
         var comments = block.comments();
-        handler.startComments(comments);
-        handler.handleComments(comments);
-        handler.finishComments(comments);
+        handler.startComments(context, comments);
+        handler.handleComments(context, comments);
+        handler.finishComments(context, comments);
     }
 
-    private void walkDetachedCommentsUpTo(List<CommentBlock> remainingComments, Location upTo, Handler handler) {
+    private void walkDetachedCommentsUpTo(Context context, List<CommentBlock> remainingComments, Location upTo) {
         // A comment is detached if it is not above the current line.
         int upToLine = upTo.getLine() - 1;
         var iterator = remainingComments.iterator();
@@ -294,178 +297,191 @@ public final class GherkinDocumentWalker {
             var commentBlock = iterator.next();
             if (commentBlock.end().getLine() < upToLine) {
                 iterator.remove();
-                walkDetachedComment(commentBlock, handler);
+                walkDetachedComment(context, commentBlock);
             } else {
                 return;
             }
         }
     }
 
-    private void walkDetachedComment(CommentBlock block, Handler handler) {
+    private void walkDetachedComment(Context context, CommentBlock block) {
         var comments = block.comments();
-        handler.startDetachedComments(comments);
-        handler.handleDetachedComments(comments);
-        handler.finishDetachedComment(comments);
+        handler.startDetachedComments(context, comments);
+        handler.handleDetachedComments(context, comments);
+        handler.finishDetachedComment(context, comments);
     }
 
-    public interface Handler {
+    /**
+     * A state free handler for events emitted by the {@link GherkinDocumentWalker}.
+     *
+     * The instance of {@code Context} should be used to store state. The
+     * {@code Output} instance should be used to output any results to.
+     *
+     * @param <Context> type of the object that stores the state for this
+     *                  handler.
+     * @param <Output>  the sink that consumes the result produced by this
+     *                  handler.
+     */
+    public interface Handler<Context, Output> {
 
-        default void startGherkinDocument(GherkinDocument gherkinDocument) {
+        Context createContext(Output output);
+
+        default void startGherkinDocument(Context context, GherkinDocument gherkinDocument) {
         }
 
-        default void finishGherkinDocument(GherkinDocument gherkinDocument) {
+        default void finishGherkinDocument(Context context, GherkinDocument gherkinDocument) {
         }
 
-        default void handleGherkinDocument(GherkinDocument gherkinDocument) {
-        }
-
-
-        default void startFeature(Feature feature) {
-        }
-
-        default void handleFeature(Feature feature) {
-        }
-
-        default void finishFeature(Feature feature) {
-        }
-
-        default void startLanguage(String language) {
-        }
-
-        default void handleLanguage(String language) {
-        }
-
-        default void finishLanguage(String language) {
-        }
-
-        default void startDescription(String description) {
-        }
-
-        default void handleDescription(String description) {
-        }
-
-        default void finishDescription(String description) {
+        default void handleGherkinDocument(Context context, GherkinDocument gherkinDocument) {
         }
 
 
-        default void startRule(Rule rule) {
+        default void startFeature(Context context, Feature feature) {
         }
 
-        default void handleRule(Rule rule) {
+        default void handleFeature(Context context, Feature feature) {
         }
 
-        default void finishRule(Rule rule) {
+        default void finishFeature(Context context, Feature feature) {
         }
 
-
-        default void startBackground(Background background) {
+        default void startLanguage(Context context, String language) {
         }
 
-        default void handleBackground(Background background) {
+        default void handleLanguage(Context context, String language) {
         }
 
-        default void finishBackground(Background background) {
+        default void finishLanguage(Context context, String language) {
         }
 
-
-        default void startScenario(Scenario scenario) {
+        default void startDescription(Context context, String description) {
         }
 
-        default void handleScenario(Scenario scenario) {
+        default void handleDescription(Context context, String description) {
         }
 
-        default void finishScenario(Scenario scenario) {
-        }
-
-
-        default void startStep(Step step) {
-        }
-
-        default void handleStep(Step step) {
-        }
-
-        default void finishStep(Step step) {
+        default void finishDescription(Context context, String description) {
         }
 
 
-        default void startExamples(Examples examples) {
+        default void startRule(Context context, Rule rule) {
         }
 
-        default void handleExamples(Examples examples) {
+        default void handleRule(Context context, Rule rule) {
         }
 
-        default void finishExamples(Examples examples) {
-        }
-
-
-        default void startExamplesTableRow(TableRow tableRow) {
-        }
-
-        default void handleExamplesTableRow(TableRow tableRow) {
-        }
-
-        default void finishExamplesTableRow(TableRow tableRow) {
+        default void finishRule(Context context, Rule rule) {
         }
 
 
-        default void startDataTable(DataTable dataTable) {
+        default void startBackground(Context context, Background background) {
         }
 
-        default void handleDataTable(DataTable dataTable) {
+        default void handleBackground(Context context, Background background) {
         }
 
-        default void finishDataTable(DataTable dataTable) {
-        }
-
-
-        default void startDataTableRow(TableRow tableRow) {
-        }
-
-        default void handleDataTableRow(TableRow tableRow) {
-        }
-
-        default void finishDataTableRow(TableRow tableRow) {
+        default void finishBackground(Context context, Background background) {
         }
 
 
-        default void startDocString(DocString docString) {
+        default void startScenario(Context context, Scenario scenario) {
         }
 
-        default void handleDocString(DocString docString) {
+        default void handleScenario(Context context, Scenario scenario) {
         }
 
-        default void finishDocString(DocString docString) {
-        }
-
-
-        default void startTags(List<Tag> tags) {
-        }
-
-        default void handleTags(List<Tag> tags) {
-        }
-
-        default void finishTags(List<Tag> tags) {
+        default void finishScenario(Context context, Scenario scenario) {
         }
 
 
-        default void startDetachedComments(List<Comment> comments) {
+        default void startStep(Context context, Step step) {
         }
 
-        default void handleDetachedComments(List<Comment> comments) {
+        default void handleStep(Context context, Step step) {
+        }
+
+        default void finishStep(Context context, Step step) {
+        }
+
+
+        default void startExamples(Context context, Examples examples) {
+        }
+
+        default void handleExamples(Context context, Examples examples) {
+        }
+
+        default void finishExamples(Context context, Examples examples) {
+        }
+
+
+        default void startExamplesTableRow(Context context, TableRow tableRow) {
+        }
+
+        default void handleExamplesTableRow(Context context, TableRow tableRow) {
+        }
+
+        default void finishExamplesTableRow(Context context, TableRow tableRow) {
+        }
+
+
+        default void startDataTable(Context context, DataTable dataTable) {
+        }
+
+        default void handleDataTable(Context context, DataTable dataTable) {
+        }
+
+        default void finishDataTable(Context context, DataTable dataTable) {
+        }
+
+
+        default void startDataTableRow(Context context, TableRow tableRow) {
+        }
+
+        default void handleDataTableRow(Context context, TableRow tableRow) {
+        }
+
+        default void finishDataTableRow(Context context, TableRow tableRow) {
+        }
+
+
+        default void startDocString(Context context, DocString docString) {
+        }
+
+        default void handleDocString(Context context, DocString docString) {
+        }
+
+        default void finishDocString(Context context, DocString docString) {
+        }
+
+
+        default void startTags(Context context, List<Tag> tags) {
+        }
+
+        default void handleTags(Context context, List<Tag> tags) {
+        }
+
+        default void finishTags(Context context, List<Tag> tags) {
+        }
+
+
+        default void startDetachedComments(Context context, List<Comment> comments) {
+        }
+
+        default void handleDetachedComments(Context context, List<Comment> comments) {
 
         }
 
-        default void finishDetachedComment(List<Comment> comments) {
+        default void finishDetachedComment(Context context, List<Comment> comments) {
         }
 
 
-        default void startComments(List<Comment> comments) {
+        default void startComments(Context context, List<Comment> comments) {
         }
 
-        default void handleComments(List<Comment> comments) {
+        default void handleComments(Context context, List<Comment> comments) {
         }
 
-        default void finishComments(List<Comment> comments) {
+        default void finishComments(Context context, List<Comment> comments) {
         }
 
     }

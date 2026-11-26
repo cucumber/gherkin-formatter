@@ -1,6 +1,7 @@
 package io.cucumber.gherkin.pretty;
 
 import io.cucumber.gherkin.pretty.GherkinDocumentWalker.Handler;
+import io.cucumber.gherkin.pretty.PrettyHandler.Context;
 import io.cucumber.messages.types.Background;
 import io.cucumber.messages.types.Comment;
 import io.cucumber.messages.types.DataTable;
@@ -17,259 +18,224 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-final class PrettyHandler implements Handler {
+final class PrettyHandler implements Handler<Context, PrintWriter> {
 
-    private final DataTableFormatter tableFormatter = new DataTableFormatter();
-    private final DocStringFormatter docStringFormatter = new DocStringFormatter();
-    private final CommentFormatter commentFormatter = new CommentFormatter();
 
     private final Configuration configuration;
-    private final PrintWriter writer;
 
-    private int depth = -1;
-    private int consecutiveNewLinesWritten = 1; // empty document
-    private int enqueuedEmptyLines = 0;
-
-    PrettyHandler(Configuration configuration, PrintWriter writer) {
+    PrettyHandler(Configuration configuration) {
         this.configuration = configuration;
-        this.writer = writer;
     }
 
     @Override
-    public void startFeature(Feature feature) {
-        depth++;
-        ensureEmptyLine();
+    public Context createContext(PrintWriter writer) {
+        return new Context(writer);
     }
 
     @Override
-    public void handleFeature(Feature feature) {
-        writeLine(formatTitle(feature.getKeyword(), feature.getName()));
+    public void startFeature(Context context, Feature feature) {
+        context.depth++;
+        context.ensureEmptyLine();
     }
 
     @Override
-    public void finishFeature(Feature feature) {
-        depth--;
+    public void handleFeature(Context context, Feature feature) {
+        context.writeLine(formatTitle(feature.getKeyword(), feature.getName()));
     }
 
     @Override
-    public void handleLanguage(String language) {
+    public void finishFeature(Context context, Feature feature) {
+        context.depth--;
+    }
+
+    @Override
+    public void handleLanguage(Context context, String language) {
         if ("en".equals(language)) {
             return;
         }
-        writeLine("# language: %s".formatted(language));
+        context.writeLine("# language: %s".formatted(language));
     }
 
     @Override
-    public void startDescription(String description) {
-        depth++;
+    public void startDescription(Context context, String description) {
+        context.depth++;
         // TODO: Make spacing configurable
-        ensureEmptyLine();
+        context.ensureEmptyLine();
     }
 
     @Override
-    public void handleDescription(String description) {
+    public void handleDescription(Context context, String description) {
         // TODO: Description are multi line but don't have a location attached
         // or a line abstraction in Gherkin. This means comments around the
         // location are not accurately positioned.
         description.stripTrailing().stripIndent().lines()
                 .map(String::stripTrailing)
-                .forEach(this::writeLine);
+                .forEach(context::writeLine);
     }
 
     @Override
-    public void finishDescription(String description) {
-        depth--;
-        ensureEmptyLine();
+    public void finishDescription(Context context, String description) {
+        context.depth--;
+        context.ensureEmptyLine();
     }
 
     @Override
-    public void startRule(Rule rule) {
-        ensureEmptyLine();
-        depth++;
+    public void startRule(Context context, Rule rule) {
+        context.ensureEmptyLine();
+        context.depth++;
     }
 
     @Override
-    public void handleRule(Rule rule) {
-        writeLine(formatTitle(rule.getKeyword(), rule.getName()));
+    public void handleRule(Context context, Rule rule) {
+        context.writeLine(formatTitle(rule.getKeyword(), rule.getName()));
     }
 
     @Override
-    public void finishRule(Rule rule) {
-        depth--;
+    public void finishRule(Context context, Rule rule) {
+        context.depth--;
     }
 
     @Override
-    public void startBackground(Background background) {
-        depth++;
-        ensureEmptyLine();
+    public void startBackground(Context context, Background background) {
+        context.depth++;
+        context.ensureEmptyLine();
     }
 
     @Override
-    public void handleBackground(Background background) {
-        writeLine(formatTitle(background.getKeyword(), background.getName()));
+    public void handleBackground(Context context, Background background) {
+        context.writeLine(formatTitle(background.getKeyword(), background.getName()));
     }
 
     @Override
-    public void finishBackground(Background background) {
-        depth--;
+    public void finishBackground(Context context, Background background) {
+        context.depth--;
     }
 
     @Override
-    public void startScenario(Scenario scenario) {
-        depth++;
-        ensureEmptyLine();
+    public void startScenario(Context context, Scenario scenario) {
+        context.depth++;
+        context.ensureEmptyLine();
     }
 
     @Override
-    public void handleScenario(Scenario scenario) {
-        writeLine(formatTitle(scenario.getKeyword(), scenario.getName()));
+    public void handleScenario(Context context, Scenario scenario) {
+        context.writeLine(formatTitle(scenario.getKeyword(), scenario.getName()));
     }
 
     @Override
-    public void finishScenario(Scenario scenario) {
-        depth--;
+    public void finishScenario(Context context, Scenario scenario) {
+        context.depth--;
     }
 
     @Override
-    public void startStep(Step step) {
-        depth++;
+    public void startStep(Context context, Step step) {
+        context.depth++;
     }
 
     @Override
-    public void handleStep(Step step) {
-        writeLine(formatStep(step.getKeyword(), step.getText()));
+    public void handleStep(Context context, Step step) {
+        context.writeLine(formatStep(step.getKeyword(), step.getText()));
     }
 
     @Override
-    public void finishStep(Step step) {
-        depth--;
+    public void finishStep(Context context, Step step) {
+        context.depth--;
     }
 
     @Override
-    public void startDocString(DocString docString) {
-        depth++;
+    public void startDocString(Context context, DocString docString) {
+        context.depth++;
     }
 
     @Override
-    public void handleDocString(DocString docString) {
-        docStringFormatter.formatTo(docString, this::writeLine);
+    public void handleDocString(Context context, DocString docString) {
+        context.docStringFormatter.formatTo(docString, context::writeLine);
     }
 
     @Override
-    public void finishDocString(DocString docString) {
-        depth--;
+    public void finishDocString(Context context, DocString docString) {
+        context.depth--;
     }
 
     @Override
-    public void startDataTable(DataTable dataTable) {
-        depth++;
-        tableFormatter.setCurrent(dataTable);
+    public void startDataTable(Context context, DataTable dataTable) {
+        context.depth++;
+        context.tableFormatter.setCurrent(dataTable);
     }
 
     @Override
-    public void finishDataTable(DataTable dataTable) {
-        depth--;
-        tableFormatter.clearCurrent();
+    public void finishDataTable(Context context, DataTable dataTable) {
+        context.depth--;
+        context.tableFormatter.clearCurrent();
     }
 
     @Override
-    public void handleDataTableRow(TableRow tableRow) {
-        tableFormatter.formatTableRowTo(tableRow, this::writeLine);
+    public void handleDataTableRow(Context context, TableRow tableRow) {
+        context.tableFormatter.formatTableRowTo(tableRow, context::writeLine);
     }
 
     @Override
-    public void startExamples(Examples examples) {
-        depth++;
-        ensureEmptyLine();
-        tableFormatter.setCurrent(examples);
+    public void startExamples(Context context, Examples examples) {
+        context.depth++;
+        context.ensureEmptyLine();
+        context.tableFormatter.setCurrent(examples);
     }
 
     @Override
-    public void handleExamples(Examples examples) {
-        writeLine(formatTitle(examples.getKeyword(), examples.getName()));
+    public void handleExamples(Context context, Examples examples) {
+        context.writeLine(formatTitle(examples.getKeyword(), examples.getName()));
     }
 
     @Override
-    public void finishExamples(Examples examples) {
-        depth--;
-        tableFormatter.clearCurrent();
+    public void finishExamples(Context context, Examples examples) {
+        context.depth--;
+        context.tableFormatter.clearCurrent();
     }
 
     @Override
-    public void startExamplesTableRow(TableRow tableRow) {
-        depth++;
+    public void startExamplesTableRow(Context context, TableRow tableRow) {
+        context.depth++;
     }
 
     @Override
-    public void handleExamplesTableRow(TableRow tableRow) {
-        tableFormatter.formatTableRowTo(tableRow, this::writeLine);
+    public void handleExamplesTableRow(Context context, TableRow tableRow) {
+        context.tableFormatter.formatTableRowTo(tableRow, context::writeLine);
     }
 
     @Override
-    public void finishExamplesTableRow(TableRow tableRow) {
-        depth--;
+    public void finishExamplesTableRow(Context context, TableRow tableRow) {
+        context.depth--;
     }
 
     @Override
-    public void handleTags(List<Tag> tags) {
+    public void handleTags(Context context, List<Tag> tags) {
         // TODO: Add option to put each tag on a single line
         // TODO: Add option to sort tags
-        writeLine(tags.stream().map(Tag::getName).collect(Collectors.joining(" ")));
+        context.writeLine(tags.stream().map(Tag::getName).collect(Collectors.joining(" ")));
     }
 
     @Override
-    public void handleComments(List<Comment> comments) {
-        commentFormatter.formatCommentBlockTo(comments, this::writeLine);
+    public void handleComments(Context context, List<Comment> comments) {
+        context.commentFormatter.formatCommentBlockTo(comments, context::writeLine);
     }
 
     @Override
-    public void startDetachedComments(List<Comment> comments) {
-        depth++;
-        ensureEmptyLine();
+    public void startDetachedComments(Context context, List<Comment> comments) {
+        context.depth++;
+        context.ensureEmptyLine();
     }
 
     @Override
-    public void handleDetachedComments(List<Comment> comments) {
-        commentFormatter.formatCommentBlockTo(comments, this::writeLine);
+    public void handleDetachedComments(Context context, List<Comment> comments) {
+        context.commentFormatter.formatCommentBlockTo(comments, context::writeLine);
     }
 
     @Override
-    public void finishDetachedComment(List<Comment> comments) {
-        depth--;
-        enqueueEmptyLine();
+    public void finishDetachedComment(Context context, List<Comment> comments) {
+        context.depth--;
+        context.enqueueEmptyLine();
     }
 
-    private void writeLine(String line) {
-        if (line.isBlank()) {
-            writeLine();
-            return;
-        }
-        if (enqueuedEmptyLines > 0) {
-            writeLine();
-        }
-        for (int i = 0; i < depth; i++) {
-            writer.write(configuration.indentation());
-        }
-        writer.append(line);
-        writeLine();
-        consecutiveNewLinesWritten = 0;
-    }
-
-    private void ensureEmptyLine() {
-        if (consecutiveNewLinesWritten == 0) {
-            writeLine();
-        }
-    }
-
-    private void enqueueEmptyLine() {
-        enqueuedEmptyLines++;
-    }
-
-    private void writeLine() {
-        writer.println();
-        consecutiveNewLinesWritten++;
-        enqueuedEmptyLines = 0;
-    }
 
 
     private static String formatTitle(String keyword, String name) {
@@ -283,4 +249,52 @@ final class PrettyHandler implements Handler {
         return "%s%s".formatted(keyword, text);
     }
 
+    class Context {
+
+        private final DataTableFormatter tableFormatter = new DataTableFormatter();
+        private final DocStringFormatter docStringFormatter = new DocStringFormatter();
+        private final CommentFormatter commentFormatter = new CommentFormatter();
+
+        private final PrintWriter writer;
+
+        private int depth = -1;
+        private int consecutiveNewLinesWritten = 1; // empty document
+        private int enqueuedEmptyLines = 0;
+
+        Context(PrintWriter writer) {
+            this.writer = writer;
+        }
+
+        private void writeLine(String line) {
+            if (line.isBlank()) {
+                writeLine();
+                return;
+            }
+            if (enqueuedEmptyLines > 0) {
+                writeLine();
+            }
+            for (int i = 0; i < depth; i++) {
+                writer.write(configuration.indentation());
+            }
+            writer.append(line);
+            writeLine();
+            consecutiveNewLinesWritten = 0;
+        }
+
+        private void ensureEmptyLine() {
+            if (consecutiveNewLinesWritten == 0) {
+                writeLine();
+            }
+        }
+
+        private void enqueueEmptyLine() {
+            enqueuedEmptyLines++;
+        }
+
+        private void writeLine() {
+            writer.println();
+            consecutiveNewLinesWritten++;
+            enqueuedEmptyLines = 0;
+        }
+    }
 }

@@ -209,6 +209,8 @@ final class PrettyHandler implements Handler {
 
     @Override
     public void handleTags(List<Tag> tags) {
+        // TODO: Add option to put each tag on a single line
+        // TODO: Add option to sort tags
         writeLine(tags.stream().map(Tag::getName).collect(Collectors.joining(" ")));
     }
 
@@ -261,7 +263,6 @@ final class PrettyHandler implements Handler {
     }
 
     private void writeLine() {
-        // TODO: Which newline?
         writer.println();
         consecutiveNewLinesWritten++;
         enqueuedEmptyLines = 0;

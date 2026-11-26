@@ -62,6 +62,9 @@ In the default formatting:
  * Blank lines are converted to empty lines.
  * Consecutive empty lines are collapsed into a single empty line.
  * EOF is preceded by a new line.
+ * Tags on different lines stay on different lines
+ * Tags on the same line are separated by a space
+ 
 
 ### Comment blocks
 

@@ -36,9 +36,13 @@ import static java.util.stream.Collectors.toList;
  * <p>If the line immediately after a comment block is not empty the comment
  * block is considered attached to that line. Otherwise, it is detached.
  */
-class GherkinDocumentWalker {
+public final class GherkinDocumentWalker {
 
-    void walkGherkinDocument(GherkinDocument gherkinDocument, Handler handler) {
+    public GherkinDocumentWalker(){
+
+    }
+
+    public void walkGherkinDocument(GherkinDocument gherkinDocument, Handler handler) {
         var remainingComments = groupByCommentBlock(gherkinDocument.getComments());
         handler.startGherkinDocument(gherkinDocument);
         handler.handleGherkinDocument(gherkinDocument);
@@ -304,7 +308,7 @@ class GherkinDocumentWalker {
         handler.finishDetachedComment(comments);
     }
 
-    interface Handler {
+    public interface Handler {
 
         default void startGherkinDocument(GherkinDocument gherkinDocument) {
         }

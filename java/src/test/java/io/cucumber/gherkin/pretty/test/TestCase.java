@@ -1,13 +1,18 @@
 package io.cucumber.gherkin.pretty.test;
 
 import io.cucumber.gherkin.GherkinParser;
-import io.cucumber.gherkin.pretty.Pretty;
 import io.cucumber.messages.types.Envelope;
 import io.cucumber.messages.types.GherkinDocument;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 class TestCase {
 
@@ -15,14 +20,14 @@ class TestCase {
             .includePickles(false)
             .build();
 
-    private final io.cucumber.gherkin.pretty.Pretty pretty;
+    private final BiConsumer<GherkinDocument, OutputStream> pretty;
     private final String testCaseName;
     private final String name;
     private final Path actualPath;
     private final Path expectedPath;
 
 
-    TestCase(Path actualPath, Path expectedDirectory, io.cucumber.gherkin.pretty.Pretty pretty) {
+    TestCase(Path actualPath, Path expectedDirectory, BiConsumer<GherkinDocument, OutputStream> pretty) {
         this(
                 "",
                 actualPath,
@@ -32,7 +37,7 @@ class TestCase {
         );
     }
 
-    TestCase(String testCaseName, Path actualPath, Path expectedDirectory, io.cucumber.gherkin.pretty.Pretty pretty) {
+    TestCase(String testCaseName, Path actualPath, Path expectedDirectory, BiConsumer<GherkinDocument, OutputStream> pretty) {
         this.name = getName(actualPath);
         this.testCaseName = testCaseName;
         this.pretty = pretty;
@@ -45,8 +50,24 @@ class TestCase {
         return fileName.substring(0, fileName.lastIndexOf("."));
     }
 
-    Pretty pretty() {
-        return pretty;
+    static List<Path> findFeatures(Path dir) throws IOException {
+        List<Path> result;
+        try (Stream<Path> paths = Files.list(dir)) {
+            result = paths
+                    .filter(path -> path.getFileName().toString().endsWith(".feature"))
+                    .toList();
+        }
+        return result;
+    }
+
+    String pretty(GherkinDocument document) {
+        var out = new ByteArrayOutputStream();
+        pretty.accept(document, out);
+        return out.toString(StandardCharsets.UTF_8);
+    }
+
+    void prettyTo(GherkinDocument document, OutputStream out) {
+        pretty.accept(document, out);
     }
 
     GherkinDocument actual() throws IOException {

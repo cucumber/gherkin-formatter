@@ -8,29 +8,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static io.cucumber.gherkin.pretty.test.TestCase.findFeatures;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 class PrettyAcceptanceTest {
-
-    private static List<Path> findFeatures(Path dir) throws IOException {
-        List<Path> result;
-        try (Stream<Path> paths = Files.list(dir)) {
-            result = paths
-                    .filter(path -> path.getFileName().toString().endsWith(".feature"))
-                    .toList();
-        }
-        return result;
-    }
 
     @Nested
     class Configuration {
@@ -48,7 +38,7 @@ class PrettyAcceptanceTest {
             var testCases = new ArrayList<TestCase>();
             pretties.forEach((name, pretty) -> {
                 paths.forEach(path -> {
-                    testCases.add(new TestCase(name, path, expectedDirectory, pretty));
+                    testCases.add(new TestCase(name, path, expectedDirectory, pretty::formatTo));
                 });
             });
 
@@ -59,16 +49,18 @@ class PrettyAcceptanceTest {
         @MethodSource("acceptance")
         @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void test(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty().format(testCase.actual());
+            var formatted = testCase.pretty(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
 
         @ParameterizedTest
         @MethodSource("acceptance")
         @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
-        void update(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty().format(testCase.actual());
-            Files.writeString(testCase.expectedPath(), formatted, TRUNCATE_EXISTING);
+        void updateExpectedFiles(TestCase testCase) throws Exception {
+            try (OutputStream out = Files.newOutputStream(testCase.expectedPath())) {
+                testCase.prettyTo(testCase.actual(), out);
+                Files.copy(testCase.expectedPath(), System.out);
+            }
         }
     }
 
@@ -82,7 +74,7 @@ class PrettyAcceptanceTest {
             var pretty = Pretty.builder().build();
             return findFeatures(actualDirectory)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedDirectory, pretty))
+                    .map(actual -> new TestCase(actual, expectedDirectory, pretty::formatTo))
                     .toList();
         }
 
@@ -90,16 +82,18 @@ class PrettyAcceptanceTest {
         @MethodSource("acceptance")
         @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void test(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty().format(testCase.actual());
+            var formatted = testCase.pretty(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
 
         @ParameterizedTest
         @MethodSource("acceptance")
         @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
-        void update(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty().format(testCase.actual());
-            Files.writeString(testCase.expectedPath(), formatted, TRUNCATE_EXISTING);
+        void updateExpectedFiles(TestCase testCase) throws Exception {
+            try (OutputStream out = Files.newOutputStream(testCase.expectedPath())) {
+                testCase.prettyTo(testCase.actual(), out);
+                Files.copy(testCase.expectedPath(), System.out);
+            }
         }
     }
 
@@ -112,7 +106,7 @@ class PrettyAcceptanceTest {
             var pretty = Pretty.builder().build();
             return findFeatures(actualDirectory)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedDirectory, pretty))
+                    .map(actual -> new TestCase(actual, expectedDirectory, pretty::formatTo))
                     .toList();
         }
 
@@ -125,19 +119,21 @@ class PrettyAcceptanceTest {
             if (unsupported.contains(testCase.name())) {
                 return;
             }
-            var formatted = testCase.pretty().format(testCase.actual());
+            var formatted = testCase.pretty(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
 
         @ParameterizedTest
         @MethodSource("acceptance")
         @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
-        void update(TestCase testCase) throws Exception {
+        void updateExpectedFiles(TestCase testCase) throws Exception {
             if (unsupported.contains(testCase.name())) {
                 return;
             }
-            var formatted = testCase.pretty().format(testCase.actual());
-            Files.writeString(testCase.expectedPath(), formatted, TRUNCATE_EXISTING);
+            try (OutputStream out = Files.newOutputStream(testCase.expectedPath())) {
+                testCase.prettyTo(testCase.actual(), out);
+                Files.copy(testCase.expectedPath(), System.out);
+            }
         }
     }
 
@@ -150,14 +146,14 @@ class PrettyAcceptanceTest {
             var pretty = Pretty.builder().build();
             return findFeatures(expectedAndActual)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedAndActual, pretty))
+                    .map(actual -> new TestCase(actual, expectedAndActual, pretty::formatTo))
                     .toList();
         }
 
         @ParameterizedTest
         @MethodSource("acceptance")
         void test(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty().format(testCase.actual());
+            var formatted = testCase.pretty(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
     }

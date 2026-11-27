@@ -121,8 +121,19 @@ final class TableFormatter {
         for (int i = 0; i < length; ++i) {
             char c = value.charAt(i);
             builder.append(switch (c) {
-                // TODO: Escape characters that don't escape anything don't have to be escaped
-                case '\\' -> "\\\\";
+                case '\\' -> {
+                    if (i + 1 < length) {
+                        char next = value.charAt(i + 1);
+                        // Only escape backslashes that escape a character
+                        // that has to be escaped.
+                        switch (next) {
+                            case '\\', '\n', '|', 'n' -> {
+                                yield "\\\\";
+                            }
+                        }
+                    }
+                    yield c;
+                }
                 case '\n' -> "\\n";
                 case '|' -> "\\|";
                 default -> c;

@@ -10,7 +10,7 @@ Download it from Maven Central.
 ## Usage
 
 Use [io.cucumber:gherkin](https://github.com/cucumber/gherkin) to parse a
-feature file. Then format it with Gherkin `GherkinPrettyFormatter` formatter. 
+feature file. Then format it with Gherkin `GherkinDocumentFormatter` formatter. 
 
 ```java
 GherkinParser parser = GherkinParser.builder()
@@ -23,7 +23,7 @@ parser.parse(Path.of("path/to/example.feature"))
         .flatMap(Optional::stream)
         .findFirst()
         .ifPresent(gherkinDocument -> {
-            var pretty = GherkinPrettyFormatter.builder().build();
+            var pretty = GherkinDocumentFormatter.builder().build();
             var formattedDocument = pretty.format(gherkinDocument)
             // Use formattedDocument for something 
         });

@@ -1,16 +1,16 @@
 package io.cucumber.gherkin.pretty;
 
-import io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element;
-import io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Margin;
-import io.cucumber.gherkin.pretty.GherkinPrettyFormatter.TagLayout;
-import io.cucumber.gherkin.pretty.GherkinPrettyFormatter.TagOrder;
+import io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element;
+import io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Margin;
+import io.cucumber.gherkin.pretty.GherkinDocumentFormatter.TagLayout;
+import io.cucumber.gherkin.pretty.GherkinDocumentFormatter.TagOrder;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Margin.BEFORE;
-import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Margin.BOTH;
+import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Margin.BEFORE;
+import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Margin.BOTH;
 
 record Configuration(
         String indentation,

@@ -22,11 +22,11 @@ import static java.util.Objects.requireNonNull;
 /**
  * Pretty format Gherkin documents.
  */
-public final class GherkinPrettyFormatter {
+public final class GherkinDocumentFormatter {
 
     private final Configuration configuration;
 
-    private GherkinPrettyFormatter(Configuration configuration) {
+    private GherkinDocumentFormatter(Configuration configuration) {
         this.configuration = configuration;
     }
 
@@ -45,7 +45,7 @@ public final class GherkinPrettyFormatter {
         requireNonNull(gherkinDocument);
         requireNonNull(out);
 
-        var handler = new PrettyHandler(configuration);
+        var handler = new Pretty(configuration);
         var documentWalker = new GherkinDocumentWalker<>(handler);
 
         try (var printWriter = new PrintWriter(new OutputStreamWriter(out, UTF_8))) {
@@ -118,8 +118,8 @@ public final class GherkinPrettyFormatter {
             return this;
         }
 
-        public GherkinPrettyFormatter build() {
-            return new GherkinPrettyFormatter(new Configuration(
+        public GherkinDocumentFormatter build() {
+            return new GherkinDocumentFormatter(new Configuration(
                     indentation,
                     Map.copyOf(margins),
                     tableRightAlignedValuesPattern,

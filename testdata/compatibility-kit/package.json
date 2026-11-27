@@ -9,7 +9,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@cucumber/compatibility-kit": "^31.0.1",
+    "@cucumber/compatibility-kit": "^31.0.2",
     "shx": "^0.4.0"
   }
 }

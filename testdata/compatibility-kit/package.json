@@ -1,15 +1,15 @@
 {
-  "name": "gherkin-pretty-testdata",
+  "name": "gherkin-formatter-testdata",
   "version": "1.0.0",
-  "description": "Gherkin Pretty uses some test data for acceptance testing.",
+  "description": "Gherkin Formatter uses some test data for acceptance testing.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "shx cp node_modules/@cucumber/compatibility-kit/features/**/*.ndjson ./src"
+    "postinstall": "shx cp node_modules/@cucumber/compatibility-kit/features/**/*.feature ./src"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "@cucumber/compatibility-kit": "^31.0.0",
+    "@cucumber/compatibility-kit": "^31.0.2",
     "shx": "^0.4.0"
   }
 }

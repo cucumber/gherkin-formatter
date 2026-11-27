@@ -41,7 +41,6 @@ import static io.cucumber.gherkin.pretty.Margin.NONE;
 
 final class PrettyHandler implements Handler<Context, PrintWriter> {
 
-
     private final Configuration configuration;
 
     PrettyHandler(Configuration configuration) {

@@ -1,8 +1,7 @@
 package io.cucumber.gherkin.formatter;
 
-import io.cucumber.messages.types.Comment;
+import io.cucumber.gherkin.utils.GherkinDocumentWalker;
 import io.cucumber.messages.types.GherkinDocument;
-import io.cucumber.messages.types.Location;
 import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -10,10 +9,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static io.cucumber.gherkin.formatter.Configuration.DEFAULT_INDENTATION;
 import static io.cucumber.gherkin.formatter.Configuration.DEFAULT_MARGINS;
@@ -200,17 +197,4 @@ public final class GherkinDocumentFormatter {
         DETACHED_COMMENTS
     }
 
-    record CommentBlock(Location start, Location finish, List<Comment> comments) {
-
-        static List<CommentBlock> groupByCommentBlock(List<Comment> comments) {
-           var blocks = GherkinDocumentUtil.groupByBlock(comments, Comment::getLocation);
-            return blocks.stream() //
-                    .map(block -> {
-                        var start = block.get(0).getLocation();
-                        var end = block.get(block.size() - 1).getLocation();
-                        return new CommentBlock(start, end, block);
-                    }) //
-                    .collect(Collectors.toList());
-        }
-    }
 }

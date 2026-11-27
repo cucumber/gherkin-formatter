@@ -311,6 +311,7 @@ public final class GherkinDocumentWalker<Context, Consumer> {
 
         Context createContext(Output output);
 
+
         default void startGherkinDocument(Context context, GherkinDocument gherkinDocument) {
         }
 

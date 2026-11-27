@@ -5,8 +5,8 @@ module io.cucumber.gherkin.formatter.test {
     requires io.cucumber.gherkin;
     requires io.cucumber.gherkin.formatter;
     requires io.cucumber.messages;
-    requires io.cucumber.messages.ndjson;
     requires org.assertj.core;
+    requires io.cucumber.gherkin.utils;
 
     opens io.cucumber.gherkin.formatter.test;
 }

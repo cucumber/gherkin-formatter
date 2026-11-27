@@ -1,7 +1,7 @@
 package io.cucumber.gherkin.formatter;
 
-import io.cucumber.gherkin.formatter.GherkinDocumentWalker.Handler;
 import io.cucumber.gherkin.formatter.Pretty.Context;
+import io.cucumber.gherkin.utils.GherkinDocumentWalker;
 import io.cucumber.messages.types.Background;
 import io.cucumber.messages.types.Comment;
 import io.cucumber.messages.types.DataTable;
@@ -46,7 +46,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Pretty formats Gherkin Documents.
  */
-final class Pretty implements Handler<Context, PrintWriter> {
+final class Pretty implements GherkinDocumentWalker.Handler<Context, PrintWriter> {
 
     private final Configuration configuration;
 
@@ -293,9 +293,7 @@ final class Pretty implements Handler<Context, PrintWriter> {
         switch (configuration.tagLayout()) {
             case AS_IS -> tags.stream() //
                     .collect(groupingBy(tag -> tag.getLocation().getLine(), LinkedHashMap::new, toList())) //
-                    .forEach((__, tagsOnTheSameLine) -> {
-                        context.writeLine(createTagLine(tagsOnTheSameLine));
-                    });
+                    .forEach((__, tagsOnTheSameLine) -> context.writeLine(createTagLine(tagsOnTheSameLine)));
             case ONE_PER_LINE, ONE_LINE -> { /* no-op */ }
         }
     }

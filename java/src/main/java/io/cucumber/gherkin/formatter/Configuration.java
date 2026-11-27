@@ -9,9 +9,6 @@ import org.jspecify.annotations.Nullable;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin.BEFORE;
-import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin.BOTH;
-
 record Configuration(
         String indentation,
         Map<Element, Margin> margin,
@@ -23,13 +20,13 @@ record Configuration(
     static final String DEFAULT_INDENTATION = "  ";
 
     static final Map<Element, Margin> DEFAULT_MARGINS = Map.of(
-            Element.FEATURE, BEFORE,
-            Element.DESCRIPTION, BOTH,
-            Element.RULE, BOTH,
-            Element.BACKGROUND, BEFORE,
-            Element.SCENARIO, BEFORE,
-            Element.EXAMPLES, BEFORE,
-            Element.DETACHED_COMMENTS, BOTH
+            Element.FEATURE, Margin.BEFORE,
+            Element.DESCRIPTION, Margin.BOTH,
+            Element.RULE, Margin.BOTH,
+            Element.BACKGROUND, Margin.BEFORE,
+            Element.SCENARIO, Margin.BEFORE,
+            Element.EXAMPLES, Margin.BEFORE,
+            Element.DETACHED_COMMENTS, Margin.BOTH
     );
 
     /**

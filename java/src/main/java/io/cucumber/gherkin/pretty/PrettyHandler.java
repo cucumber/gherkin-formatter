@@ -19,25 +19,25 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.cucumber.gherkin.pretty.Pretty.Element.BACKGROUND;
-import static io.cucumber.gherkin.pretty.Pretty.Element.COMMENTS;
-import static io.cucumber.gherkin.pretty.Pretty.Element.DATA_TABLE;
-import static io.cucumber.gherkin.pretty.Pretty.Element.DATA_TABLE_ROW;
-import static io.cucumber.gherkin.pretty.Pretty.Element.DESCRIPTION;
-import static io.cucumber.gherkin.pretty.Pretty.Element.DETACHED_COMMENTS;
-import static io.cucumber.gherkin.pretty.Pretty.Element.DOCUMENT;
-import static io.cucumber.gherkin.pretty.Pretty.Element.DOC_STRING;
-import static io.cucumber.gherkin.pretty.Pretty.Element.EXAMPLES;
-import static io.cucumber.gherkin.pretty.Pretty.Element.EXAMPLES_TABLE_ROW;
-import static io.cucumber.gherkin.pretty.Pretty.Element.FEATURE;
-import static io.cucumber.gherkin.pretty.Pretty.Element.LANGUAGE;
-import static io.cucumber.gherkin.pretty.Pretty.Element.RULE;
-import static io.cucumber.gherkin.pretty.Pretty.Element.SCENARIO;
-import static io.cucumber.gherkin.pretty.Pretty.Element.STEP;
-import static io.cucumber.gherkin.pretty.Pretty.Element.TAGS;
-import static io.cucumber.gherkin.pretty.Pretty.Margin.BEFORE;
-import static io.cucumber.gherkin.pretty.Pretty.Margin.BOTH;
-import static io.cucumber.gherkin.pretty.Pretty.Margin.NONE;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.BACKGROUND;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.COMMENTS;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.DATA_TABLE;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.DATA_TABLE_ROW;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.DESCRIPTION;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.DETACHED_COMMENTS;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.DOCUMENT;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.DOC_STRING;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.EXAMPLES;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.EXAMPLES_TABLE_ROW;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.FEATURE;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.LANGUAGE;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.RULE;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.SCENARIO;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.STEP;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Element.TAGS;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Margin.BEFORE;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Margin.BOTH;
+import static io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Margin.NONE;
 import static java.util.stream.Collectors.joining;
 
 final class PrettyHandler implements Handler<Context, PrintWriter> {
@@ -383,14 +383,14 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
             consecutiveNewLinesWritten = 0;
         }
 
-        void insertMarginBefore(Pretty.Element element) {
+        void insertMarginBefore(GherkinPrettyFormatter.Element element) {
             var mode = configuration.margin().getOrDefault(element, NONE);
             if (mode == BEFORE || mode == BOTH) {
                 ensureEmptyLine();
             }
         }
 
-        void insertMarginAfter(Pretty.Element element) {
+        void insertMarginAfter(GherkinPrettyFormatter.Element element) {
             var mode = configuration.margin().getOrDefault(element, NONE);
             if (mode == BEFORE || mode == BOTH) {
                 enqueueEmptyLine();

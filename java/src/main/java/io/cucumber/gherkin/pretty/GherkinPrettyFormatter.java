@@ -22,11 +22,11 @@ import static java.util.Objects.requireNonNull;
 /**
  * Pretty format Gherkin documents.
  */
-public final class Pretty {
+public final class GherkinPrettyFormatter {
 
     private final Configuration configuration;
 
-    private Pretty(Configuration configuration) {
+    private GherkinPrettyFormatter(Configuration configuration) {
         this.configuration = configuration;
     }
 
@@ -118,8 +118,8 @@ public final class Pretty {
             return this;
         }
 
-        public Pretty build() {
-            return new Pretty(new Configuration(
+        public GherkinPrettyFormatter build() {
+            return new GherkinPrettyFormatter(new Configuration(
                     indentation,
                     Map.copyOf(margins),
                     tableRightAlignedValuesPattern,

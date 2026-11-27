@@ -1,9 +1,9 @@
 package io.cucumber.gherkin.pretty.test;
 
-import io.cucumber.gherkin.pretty.Pretty;
-import io.cucumber.gherkin.pretty.Pretty.Margin;
-import io.cucumber.gherkin.pretty.Pretty.TagLayout;
-import io.cucumber.gherkin.pretty.Pretty.TagOrder;
+import io.cucumber.gherkin.pretty.GherkinPrettyFormatter;
+import io.cucumber.gherkin.pretty.GherkinPrettyFormatter.Margin;
+import io.cucumber.gherkin.pretty.GherkinPrettyFormatter.TagLayout;
+import io.cucumber.gherkin.pretty.GherkinPrettyFormatter.TagOrder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -24,23 +24,23 @@ import static io.cucumber.gherkin.pretty.test.TestCase.findFeatures;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class PrettyAcceptanceTest {
+class GherkinPrettyFormatterAcceptanceTest {
 
     @Nested
     class Configuration {
         static List<TestCase> acceptance() {
 
-            var pretties = new LinkedHashMap<String, Pretty>();
-            pretties.put("tab-indentation", Pretty.builder().indentation("\t").build());
-            pretties.put("none-margins", setMargins(Pretty.builder(), Margin.NONE).build());
-            pretties.put("both-margins", setMargins(Pretty.builder(), Margin.BOTH).build());
-            pretties.put("swap-alignment", Pretty.builder().tableRightAlignedValuesPattern(Pattern.compile("[a-z]+")).build());
-            pretties.put("no-alignment", Pretty.builder().tableRightAlignedValuesPattern(null).build());
-            pretties.put("tags-one-line", Pretty.builder().tagStyle(TagLayout.ONE_LINE).build());
-            pretties.put("tags-one-per-line", Pretty.builder().tagStyle(TagLayout.ONE_PER_LINE).build());
-            pretties.put("tags-sorted", Pretty.builder().tagOrder(TagOrder.SORTED).build());
-            pretties.put("tags-sorted-one-line", Pretty.builder().tagOrder(TagOrder.SORTED).tagStyle(TagLayout.ONE_LINE).build());
-            pretties.put("tags-sorted-one-per-line", Pretty.builder().tagOrder(TagOrder.SORTED).tagStyle(TagLayout.ONE_PER_LINE).build());
+            var pretties = new LinkedHashMap<String, GherkinPrettyFormatter>();
+            pretties.put("tab-indentation", GherkinPrettyFormatter.builder().indentation("\t").build());
+            pretties.put("none-margins", setMargins(GherkinPrettyFormatter.builder(), Margin.NONE).build());
+            pretties.put("both-margins", setMargins(GherkinPrettyFormatter.builder(), Margin.BOTH).build());
+            pretties.put("swap-alignment", GherkinPrettyFormatter.builder().tableRightAlignedValuesPattern(Pattern.compile("[a-z]+")).build());
+            pretties.put("no-alignment", GherkinPrettyFormatter.builder().tableRightAlignedValuesPattern(null).build());
+            pretties.put("tags-one-line", GherkinPrettyFormatter.builder().tagStyle(TagLayout.ONE_LINE).build());
+            pretties.put("tags-one-per-line", GherkinPrettyFormatter.builder().tagStyle(TagLayout.ONE_PER_LINE).build());
+            pretties.put("tags-sorted", GherkinPrettyFormatter.builder().tagOrder(TagOrder.SORTED).build());
+            pretties.put("tags-sorted-one-line", GherkinPrettyFormatter.builder().tagOrder(TagOrder.SORTED).tagStyle(TagLayout.ONE_LINE).build());
+            pretties.put("tags-sorted-one-per-line", GherkinPrettyFormatter.builder().tagOrder(TagOrder.SORTED).tagStyle(TagLayout.ONE_PER_LINE).build());
 
             var paths = List.of(
                     Path.of("../testdata/compatibility-kit/src/minimal.feature"),
@@ -59,8 +59,8 @@ class PrettyAcceptanceTest {
             return testCases;
         }
 
-        private static Pretty.Builder setMargins(Pretty.Builder builder, Margin none) {
-            for (Pretty.Element value : Pretty.Element.values()) {
+        private static GherkinPrettyFormatter.Builder setMargins(GherkinPrettyFormatter.Builder builder, Margin none) {
+            for (GherkinPrettyFormatter.Element value : GherkinPrettyFormatter.Element.values()) {
                 builder.margins(value, none);
             }
             return builder;
@@ -87,12 +87,12 @@ class PrettyAcceptanceTest {
 
 
     @Nested
-    class GherkinPretty {
+    class GherkinGherkinPrettyFormatter {
 
         static List<TestCase> acceptance() throws IOException {
             var actualDirectory = Path.of("../testdata/gherkin-pretty/src");
             var expectedDirectory = Path.of("../testdata/gherkin-pretty/expected");
-            var pretty = Pretty.builder().build();
+            var pretty = GherkinPrettyFormatter.builder().build();
             return findFeatures(actualDirectory)
                     .stream()
                     .map(actual -> new TestCase(actual, expectedDirectory, pretty::formatTo))
@@ -124,7 +124,7 @@ class PrettyAcceptanceTest {
         static List<TestCase> acceptance() throws IOException {
             var actualDirectory = Path.of("../testdata/gherkin-utils/src");
             var expectedDirectory = Path.of("../testdata/gherkin-utils/expected");
-            var pretty = Pretty.builder().build();
+            var pretty = GherkinPrettyFormatter.builder().build();
             return findFeatures(actualDirectory)
                     .stream()
                     .map(actual -> new TestCase(actual, expectedDirectory, pretty::formatTo))
@@ -164,7 +164,7 @@ class PrettyAcceptanceTest {
         static List<TestCase> acceptance() throws IOException {
             // Tests a round trip
             var expectedAndActual = Path.of("../testdata/compatibility-kit/src");
-            var pretty = Pretty.builder().build();
+            var pretty = GherkinPrettyFormatter.builder().build();
             return findFeatures(expectedAndActual)
                     .stream()
                     .map(actual -> new TestCase(actual, expectedAndActual, pretty::formatTo))

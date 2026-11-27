@@ -85,9 +85,6 @@ public final class GherkinDocumentWalker<Context, Consumer> {
     }
 
     private void walkDescription(Context context, String description) {
-        if (description.isBlank()) {
-            return;
-        }
         handler.startDescription(context, description);
         handler.handleDescription(context, description);
         handler.finishDescription(context, description);

@@ -101,6 +101,9 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
 
     @Override
     public void startDescription(Context context, String description) {
+        if (description.isBlank()) {
+            return;
+        }
         context.depth++;
         context.insertMarginBefore(DESCRIPTION);
     }
@@ -117,6 +120,9 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
 
     @Override
     public void finishDescription(Context context, String description) {
+        if (description.isBlank()) {
+            return;
+        }
         context.depth--;
         context.insertMarginAfter(DESCRIPTION);
     }

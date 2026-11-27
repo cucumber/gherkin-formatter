@@ -10,24 +10,19 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
 
-final class DataTableFormatter {
+final class TableFormatter {
 
-    private static final Pattern IS_NUMBER_LIKE = Pattern.compile(
-            // Sign
-            "[-+]?" +
-                    // Significant
-                    "(?:\\d+(?:[,.]\\d+)*(?:[,.]\\d+)?|[,.]\\d+)" +
-                    // Exponent
-                    "(?:E[-+]?\\d+)?");
+
+    private final Configuration configuration;
 
     private Map<TableRow, String[]> current = Collections.emptyMap();
     private int[] longestCellLengthInColumn = new int[0];
 
-    DataTableFormatter() {
+    TableFormatter(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     void setCurrent(DataTable dataTable) {
@@ -136,19 +131,20 @@ final class DataTableFormatter {
         return builder.toString();
     }
 
-    private static String renderCellWithPadding(String cellText, int n) {
+    private String renderCellWithPadding(String cellText, int n) {
         var padding = " ".repeat(n);
-        if (isNumberLike(cellText)) {
+        if (shouldBeRightIndented(cellText)) {
             return " " + padding + cellText + " ";
         }
         return " " + cellText + padding + " ";
     }
 
-    /**
-     * Matches numbers, currency, IP addresses and hopefully not much else.
-     */
-    private static boolean isNumberLike(String cellText) {
-        return IS_NUMBER_LIKE.matcher(cellText).matches();
+    private boolean shouldBeRightIndented(String cellText) {
+        var pattern = configuration.tableRightAlignedValuesPattern();
+        if (pattern == null) {
+            return false;
+        }
+        return pattern.matcher(cellText).matches();
     }
 
 }

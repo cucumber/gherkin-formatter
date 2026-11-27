@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static io.cucumber.gherkin.pretty.test.TestCase.findFeatures;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,6 +33,8 @@ class PrettyAcceptanceTest {
             pretties.put("tab-indentation", Pretty.builder().indentation("\t").build());
             pretties.put("none-margins", setMargins(Pretty.builder(), Margin.NONE).build());
             pretties.put("both-margins", setMargins(Pretty.builder(), Margin.BOTH).build());
+            pretties.put("swap-alignment", Pretty.builder().tableRightAlignedValuesPattern(Pattern.compile("[a-z]+")).build());
+            pretties.put("no-alignment", Pretty.builder().tableRightAlignedValuesPattern(null).build());
 
             var paths = List.of(
                     Path.of("../testdata/compatibility-kit/src/minimal.feature"),

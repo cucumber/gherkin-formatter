@@ -333,7 +333,7 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
 
     class Context {
 
-        private final DataTableFormatter tableFormatter = new DataTableFormatter();
+        private final TableFormatter tableFormatter = new TableFormatter(configuration);
         private final DocStringFormatter docStringFormatter = new DocStringFormatter();
         private final CommentFormatter commentFormatter = new CommentFormatter();
 

@@ -1,6 +1,7 @@
 package io.cucumber.gherkin.pretty;
 
 import io.cucumber.messages.types.GherkinDocument;
+import org.jspecify.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
@@ -8,9 +9,11 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_INDENTATION;
 import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_MARGINS;
+import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_TABLE_RIGHT_ALIGNED_VALUES_PATTERN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
@@ -52,6 +55,7 @@ public final class Pretty {
 
         private final Map<Element, Margin> margins = new EnumMap<>(DEFAULT_MARGINS);
         private String indentation = DEFAULT_INDENTATION;
+        private @Nullable Pattern tableRightAlignedValuesPattern = DEFAULT_TABLE_RIGHT_ALIGNED_VALUES_PATTERN;
 
         private Builder() {
         }
@@ -83,8 +87,17 @@ public final class Pretty {
             return this;
         }
 
+        /**
+         * Configure the pattern for values that should be right aligned in data
+         * and example tables. Or null if all values should be left aligned.
+         */
+        public Builder tableRightAlignedValuesPattern(@Nullable Pattern pattern) {
+            this.tableRightAlignedValuesPattern = pattern;
+            return this;
+        }
+
         public Pretty build() {
-            return new Pretty(new Configuration(indentation, Map.copyOf(margins)));
+            return new Pretty(new Configuration(indentation, Map.copyOf(margins), tableRightAlignedValuesPattern));
         }
 
     }

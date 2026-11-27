@@ -1,7 +1,7 @@
-package io.cucumber.gherkin.pretty.test;
+package io.cucumber.gherkin.formatter.test;
 
-import io.cucumber.gherkin.pretty.GherkinDocumentWalker;
-import io.cucumber.gherkin.pretty.GherkinDocumentWalker.Handler;
+import io.cucumber.gherkin.formatter.GherkinDocumentWalker;
+import io.cucumber.gherkin.formatter.GherkinDocumentWalker.Handler;
 import io.cucumber.messages.types.Background;
 import io.cucumber.messages.types.Comment;
 import io.cucumber.messages.types.DataTable;
@@ -29,7 +29,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.cucumber.gherkin.pretty.test.TestCase.findFeatures;
+import static io.cucumber.gherkin.formatter.test.TestCase.findFeatures;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +58,7 @@ class GherkinDocumentWalkerAcceptanceTest {
         @MethodSource("acceptance")
         @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void test(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty(testCase.actual());
+            var formatted = testCase.format(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
 
@@ -67,7 +67,7 @@ class GherkinDocumentWalkerAcceptanceTest {
         @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void updateExpectedFiles(TestCase testCase) throws Exception {
             try (OutputStream out = Files.newOutputStream(testCase.expectedPath())) {
-                testCase.prettyTo(testCase.actual(), out);
+                testCase.formatTo(testCase.actual(), out);
                 Files.copy(testCase.expectedPath(), System.out);
             }
         }

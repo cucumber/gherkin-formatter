@@ -1,4 +1,4 @@
-[![Maven Central](https://img.shields.io/maven-central/v/io.cucumber/gherkin-pretty.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:io.cucumber%20AND%20a:gherkin-pretty)
+[![Maven Central](https://img.shields.io/maven-central/v/io.cucumber/gherkin-formatter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:io.cucumber%20AND%20a:gherkin-formatter)
 
 Gherkin Pretty Usage and Installation
 =====================================
@@ -23,8 +23,8 @@ parser.parse(Path.of("path/to/example.feature"))
         .flatMap(Optional::stream)
         .findFirst()
         .ifPresent(gherkinDocument -> {
-            var pretty = GherkinDocumentFormatter.builder().build();
-            var formattedDocument = pretty.format(gherkinDocument)
+            var formatter = GherkinDocumentFormatter.builder().build();
+            var formattedDocument = formatter.format(gherkinDocument)
             // Use formattedDocument for something 
         });
 ```

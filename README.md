@@ -1,17 +1,17 @@
 <h1 align="center">
   <img alt="" width="75" src="https://github.com/cucumber.png"/>
   <br>
-  gherkin-pretty
+  gherkin-formatter
 </h1>
 <p align="center">
-  <b>Pretty formatter for Gherkin document</b>
+  <b>Formatter for Gherkin document</b>
 </p>
 
 <p align="center">
-  <a href="https://search.maven.org/search?q=g:io.cucumber%20AND%20a:gherkin-pretty" style="text-decoration: none"><img src="https://img.shields.io/maven-central/v/io.cucumber/gherkin-pretty.svg?label=Maven%20Central" alt="Latest version on Maven Central"></a>
+  <a href="https://search.maven.org/search?q=g:io.cucumber%20AND%20a:gherkin-formatter" style="text-decoration: none"><img src="https://img.shields.io/maven-central/v/io.cucumber/gherkin-formatter.svg?label=Maven%20Central" alt="Latest version on Maven Central"></a>
 </p>
 
-This package provides a utility to pretty format Gherkin documents.
+This package provides a utility to Format Gherkin documents.
 
 ```gherkin
 Feature: Examples Tables
@@ -71,8 +71,8 @@ In the default formatting:
 
 ### Comment blocks
 
-A sequence of consecutive comment lines is called a comment block. The pretty
-formatter treats all comments in the block as a single multi-line text block.  
+A sequence of consecutive comment lines is called a comment block. The formatter
+treats all comments in the block as a single multi-line text block.  
 
 #### Indentation
 

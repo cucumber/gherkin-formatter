@@ -1,4 +1,4 @@
-package io.cucumber.gherkin.pretty;
+package io.cucumber.gherkin.formatter;
 
 import io.cucumber.messages.types.DocString;
 

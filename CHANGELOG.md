@@ -7,4 +7,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-[Unreleased]: https://github.com/cucumber/gherkin-pretty/compare/85d7d4aef73cd60a61c01d6e6490706d2aeb4252...HEAD
+[Unreleased]: https://github.com/cucumber/gherkin-formatter/compare/85d7d4aef73cd60a61c01d6e6490706d2aeb4252...HEAD

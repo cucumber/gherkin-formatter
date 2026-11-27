@@ -1,4 +1,4 @@
-package io.cucumber.gherkin.pretty;
+package io.cucumber.gherkin.formatter;
 
 import io.cucumber.messages.types.GherkinDocument;
 import org.jspecify.annotations.Nullable;
@@ -11,16 +11,16 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_INDENTATION;
-import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_MARGINS;
-import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_TABLE_RIGHT_ALIGNED_VALUES_PATTERN;
-import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_TAG_ORDER;
-import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_TAG_STYLE;
+import static io.cucumber.gherkin.formatter.Configuration.DEFAULT_INDENTATION;
+import static io.cucumber.gherkin.formatter.Configuration.DEFAULT_MARGINS;
+import static io.cucumber.gherkin.formatter.Configuration.DEFAULT_TABLE_RIGHT_ALIGNED_VALUES_PATTERN;
+import static io.cucumber.gherkin.formatter.Configuration.DEFAULT_TAG_ORDER;
+import static io.cucumber.gherkin.formatter.Configuration.DEFAULT_TAG_STYLE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Pretty format Gherkin documents.
+ * Format Gherkin documents.
  */
 public final class GherkinDocumentFormatter {
 

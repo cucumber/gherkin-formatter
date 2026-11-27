@@ -1,7 +1,7 @@
-package io.cucumber.gherkin.pretty;
+package io.cucumber.gherkin.formatter;
 
-import io.cucumber.gherkin.pretty.GherkinDocumentWalker.Handler;
-import io.cucumber.gherkin.pretty.Pretty.Context;
+import io.cucumber.gherkin.formatter.GherkinDocumentWalker.Handler;
+import io.cucumber.gherkin.formatter.Pretty.Context;
 import io.cucumber.messages.types.Background;
 import io.cucumber.messages.types.Comment;
 import io.cucumber.messages.types.DataTable;
@@ -19,27 +19,30 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.BACKGROUND;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.COMMENTS;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.DATA_TABLE;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.DATA_TABLE_ROW;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.DESCRIPTION;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.DETACHED_COMMENTS;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.DOCUMENT;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.DOC_STRING;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.EXAMPLES;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.EXAMPLES_TABLE_ROW;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.FEATURE;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.LANGUAGE;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.RULE;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.SCENARIO;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.STEP;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Element.TAGS;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Margin.BEFORE;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Margin.BOTH;
-import static io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Margin.NONE;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.BACKGROUND;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.COMMENTS;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.DATA_TABLE;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.DATA_TABLE_ROW;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.DESCRIPTION;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.DETACHED_COMMENTS;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.DOCUMENT;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.DOC_STRING;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.EXAMPLES;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.EXAMPLES_TABLE_ROW;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.FEATURE;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.LANGUAGE;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.RULE;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.SCENARIO;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.STEP;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.TAGS;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin.BEFORE;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin.BOTH;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin.NONE;
 import static java.util.stream.Collectors.joining;
 
+/**
+ * Pretty formats Gherkin Documents.
+ */
 final class Pretty implements Handler<Context, PrintWriter> {
 
     private final Configuration configuration;

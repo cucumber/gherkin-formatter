@@ -1,6 +1,6 @@
 # Acceptance test data
 
-The pretty formatter uses features from [gherkin-utils](https://github.com/cucumber/gherkin-utils)
+The Gherkin formatter uses features from [gherkin-utils](https://github.com/cucumber/gherkin-utils)
 for acceptance testing. These features were used to test `gherkin-utils`
 implementation. The outcome should be somewhat similar.
 

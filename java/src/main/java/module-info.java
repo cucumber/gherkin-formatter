@@ -1,7 +1,7 @@
-module io.cucumber.gherkin.pretty {
+module io.cucumber.gherkin.formatter {
     requires org.jspecify;
     
     requires transitive io.cucumber.messages;
 
-    exports io.cucumber.gherkin.pretty;
+    exports io.cucumber.gherkin.formatter;
 }

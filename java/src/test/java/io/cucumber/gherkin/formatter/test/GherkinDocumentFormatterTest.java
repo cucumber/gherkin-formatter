@@ -1,6 +1,6 @@
-package io.cucumber.gherkin.pretty.test;
+package io.cucumber.gherkin.formatter.test;
 
-import io.cucumber.gherkin.pretty.GherkinDocumentFormatter;
+import io.cucumber.gherkin.formatter.GherkinDocumentFormatter;
 import io.cucumber.messages.types.GherkinDocument;
 import org.junit.jupiter.api.Test;
 
@@ -13,13 +13,13 @@ class GherkinDocumentFormatterTest {
 
     @Test
     void formatsEmptyDocument(){
-        var pretty = GherkinDocumentFormatter.builder().build();
+        var formatter = GherkinDocumentFormatter.builder().build();
         GherkinDocument document = new GherkinDocument(
                 "path/to/example.feature",
                 null,
                 Collections.emptyList()
         );
-        var formatted = pretty.format(document);
+        var formatted = formatter.format(document);
         assertThat(formatted).isEmpty();
     }
 

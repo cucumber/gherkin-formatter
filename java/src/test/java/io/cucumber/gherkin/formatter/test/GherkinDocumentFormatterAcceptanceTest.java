@@ -1,9 +1,9 @@
-package io.cucumber.gherkin.pretty.test;
+package io.cucumber.gherkin.formatter.test;
 
-import io.cucumber.gherkin.pretty.GherkinDocumentFormatter;
-import io.cucumber.gherkin.pretty.GherkinDocumentFormatter.Margin;
-import io.cucumber.gherkin.pretty.GherkinDocumentFormatter.TagLayout;
-import io.cucumber.gherkin.pretty.GherkinDocumentFormatter.TagOrder;
+import io.cucumber.gherkin.formatter.GherkinDocumentFormatter;
+import io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin;
+import io.cucumber.gherkin.formatter.GherkinDocumentFormatter.TagLayout;
+import io.cucumber.gherkin.formatter.GherkinDocumentFormatter.TagOrder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static io.cucumber.gherkin.pretty.test.TestCase.findFeatures;
+import static io.cucumber.gherkin.formatter.test.TestCase.findFeatures;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
@@ -50,9 +50,9 @@ class GherkinDocumentFormatterAcceptanceTest {
 
             var expectedDirectory = Path.of("../testdata/configuration/expected");
             var testCases = new ArrayList<TestCase>();
-            pretties.forEach((name, pretty) -> {
+            pretties.forEach((name, formatter) -> {
                 paths.forEach(path -> {
-                    testCases.add(new TestCase(name, path, expectedDirectory, pretty::formatTo));
+                    testCases.add(new TestCase(name, path, expectedDirectory, formatter::formatTo));
                 });
             });
 
@@ -60,8 +60,8 @@ class GherkinDocumentFormatterAcceptanceTest {
         }
 
         private static GherkinDocumentFormatter.Builder setMargins(GherkinDocumentFormatter.Builder builder, Margin none) {
-            for (GherkinDocumentFormatter.Element value : GherkinDocumentFormatter.Element.values()) {
-                builder.margins(value, none);
+            for (GherkinDocumentFormatter.Element element : GherkinDocumentFormatter.Element.values()) {
+                builder.margins(element, none);
             }
             return builder;
         }
@@ -70,7 +70,7 @@ class GherkinDocumentFormatterAcceptanceTest {
         @MethodSource("acceptance")
         @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void test(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty(testCase.actual());
+            var formatted = testCase.format(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
 
@@ -79,7 +79,7 @@ class GherkinDocumentFormatterAcceptanceTest {
         @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void updateExpectedFiles(TestCase testCase) throws Exception {
             try (OutputStream out = Files.newOutputStream(testCase.expectedPath())) {
-                testCase.prettyTo(testCase.actual(), out);
+                testCase.formatTo(testCase.actual(), out);
                 Files.copy(testCase.expectedPath(), System.out);
             }
         }
@@ -90,12 +90,12 @@ class GherkinDocumentFormatterAcceptanceTest {
     class GherkinGherkinDocumentFormatter {
 
         static List<TestCase> acceptance() throws IOException {
-            var actualDirectory = Path.of("../testdata/gherkin-pretty/src");
-            var expectedDirectory = Path.of("../testdata/gherkin-pretty/expected");
-            var pretty = GherkinDocumentFormatter.builder().build();
+            var actualDirectory = Path.of("../testdata/gherkin-formatter/src");
+            var expectedDirectory = Path.of("../testdata/gherkin-formatter/expected");
+            var formatter = GherkinDocumentFormatter.builder().build();
             return findFeatures(actualDirectory)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedDirectory, pretty::formatTo))
+                    .map(actual -> new TestCase(actual, expectedDirectory, formatter::formatTo))
                     .toList();
         }
 
@@ -103,7 +103,7 @@ class GherkinDocumentFormatterAcceptanceTest {
         @MethodSource("acceptance")
         @DisabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void test(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty(testCase.actual());
+            var formatted = testCase.format(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
 
@@ -112,7 +112,7 @@ class GherkinDocumentFormatterAcceptanceTest {
         @EnabledIfEnvironmentVariable(named = "UPDATE_EXPECTED_FILES", matches = "true")
         void updateExpectedFiles(TestCase testCase) throws Exception {
             try (OutputStream out = Files.newOutputStream(testCase.expectedPath())) {
-                testCase.prettyTo(testCase.actual(), out);
+                testCase.formatTo(testCase.actual(), out);
                 Files.copy(testCase.expectedPath(), System.out);
             }
         }
@@ -124,10 +124,10 @@ class GherkinDocumentFormatterAcceptanceTest {
         static List<TestCase> acceptance() throws IOException {
             var actualDirectory = Path.of("../testdata/gherkin-utils/src");
             var expectedDirectory = Path.of("../testdata/gherkin-utils/expected");
-            var pretty = GherkinDocumentFormatter.builder().build();
+            var formatter = GherkinDocumentFormatter.builder().build();
             return findFeatures(actualDirectory)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedDirectory, pretty::formatTo))
+                    .map(actual -> new TestCase(actual, expectedDirectory, formatter::formatTo))
                     .toList();
         }
 
@@ -140,7 +140,7 @@ class GherkinDocumentFormatterAcceptanceTest {
             if (unsupported.contains(testCase.name())) {
                 return;
             }
-            var formatted = testCase.pretty(testCase.actual());
+            var formatted = testCase.format(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
 
@@ -152,7 +152,7 @@ class GherkinDocumentFormatterAcceptanceTest {
                 return;
             }
             try (OutputStream out = Files.newOutputStream(testCase.expectedPath())) {
-                testCase.prettyTo(testCase.actual(), out);
+                testCase.formatTo(testCase.actual(), out);
                 Files.copy(testCase.expectedPath(), System.out);
             }
         }
@@ -164,17 +164,17 @@ class GherkinDocumentFormatterAcceptanceTest {
         static List<TestCase> acceptance() throws IOException {
             // Tests a round trip
             var expectedAndActual = Path.of("../testdata/compatibility-kit/src");
-            var pretty = GherkinDocumentFormatter.builder().build();
+            var formatter = GherkinDocumentFormatter.builder().build();
             return findFeatures(expectedAndActual)
                     .stream()
-                    .map(actual -> new TestCase(actual, expectedAndActual, pretty::formatTo))
+                    .map(actual -> new TestCase(actual, expectedAndActual, formatter::formatTo))
                     .toList();
         }
 
         @ParameterizedTest
         @MethodSource("acceptance")
         void test(TestCase testCase) throws Exception {
-            var formatted = testCase.pretty(testCase.actual());
+            var formatted = testCase.format(testCase.actual());
             assertThat(formatted).isEqualToIgnoringNewLines(testCase.expected());
         }
     }

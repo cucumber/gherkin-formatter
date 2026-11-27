@@ -1,6 +1,6 @@
 # Acceptance test data
 
-The pretty formatter uses the examples from the [Cucumber Compatibility Kit](https://github.com/cucumber/compatibility-kit)
+The Gherkin formatter uses the examples from the [Cucumber Compatibility Kit](https://github.com/cucumber/compatibility-kit)
 for acceptance testing. These examples consist of `.feature` files created by
 the CCK's reference implementation.
 

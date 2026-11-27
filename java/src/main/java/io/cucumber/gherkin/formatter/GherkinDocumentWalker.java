@@ -1,4 +1,4 @@
-package io.cucumber.gherkin.pretty;
+package io.cucumber.gherkin.formatter;
 
 import io.cucumber.messages.types.Background;
 import io.cucumber.messages.types.Comment;
@@ -19,7 +19,7 @@ import io.cucumber.messages.types.Tag;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import static io.cucumber.gherkin.pretty.CommentBlock.groupByCommentBlock;
+import static io.cucumber.gherkin.formatter.CommentBlock.groupByCommentBlock;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 

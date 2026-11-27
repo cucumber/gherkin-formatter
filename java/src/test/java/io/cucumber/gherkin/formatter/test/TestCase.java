@@ -1,4 +1,4 @@
-package io.cucumber.gherkin.pretty.test;
+package io.cucumber.gherkin.formatter.test;
 
 import io.cucumber.gherkin.GherkinParser;
 import io.cucumber.messages.types.Envelope;
@@ -20,27 +20,27 @@ class TestCase {
             .includePickles(false)
             .build();
 
-    private final BiConsumer<GherkinDocument, OutputStream> pretty;
+    private final BiConsumer<GherkinDocument, OutputStream> formatter;
     private final String testCaseName;
     private final String name;
     private final Path actualPath;
     private final Path expectedPath;
 
 
-    TestCase(Path actualPath, Path expectedDirectory, BiConsumer<GherkinDocument, OutputStream> pretty) {
+    TestCase(Path actualPath, Path expectedDirectory, BiConsumer<GherkinDocument, OutputStream> formatter) {
         this(
                 "",
                 actualPath,
                 expectedDirectory,
-                pretty
+                formatter
 
         );
     }
 
-    TestCase(String testCaseName, Path actualPath, Path expectedDirectory, BiConsumer<GherkinDocument, OutputStream> pretty) {
+    TestCase(String testCaseName, Path actualPath, Path expectedDirectory, BiConsumer<GherkinDocument, OutputStream> formatter) {
         this.name = getName(actualPath);
         this.testCaseName = testCaseName;
-        this.pretty = pretty;
+        this.formatter = formatter;
         this.actualPath = actualPath;
         this.expectedPath = expectedDirectory.resolve(getExpectedName(name));
     }
@@ -67,14 +67,14 @@ class TestCase {
         return result;
     }
 
-    String pretty(GherkinDocument document) {
+    String format(GherkinDocument document) {
         var out = new ByteArrayOutputStream();
-        pretty.accept(document, out);
+        formatter.accept(document, out);
         return out.toString(StandardCharsets.UTF_8);
     }
 
-    void prettyTo(GherkinDocument document, OutputStream out) {
-        pretty.accept(document, out);
+    void formatTo(GherkinDocument document, OutputStream out) {
+        formatter.accept(document, out);
     }
 
     GherkinDocument actual() throws IOException {

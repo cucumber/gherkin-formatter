@@ -17,27 +17,28 @@ import io.cucumber.messages.types.Tag;
 
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
-import static io.cucumber.gherkin.pretty.Element.BACKGROUND;
-import static io.cucumber.gherkin.pretty.Element.COMMENTS;
-import static io.cucumber.gherkin.pretty.Element.DATA_TABLE;
-import static io.cucumber.gherkin.pretty.Element.DATA_TABLE_ROW;
-import static io.cucumber.gherkin.pretty.Element.DESCRIPTION;
-import static io.cucumber.gherkin.pretty.Element.DETACHED_COMMENTS;
-import static io.cucumber.gherkin.pretty.Element.DOCUMENT;
-import static io.cucumber.gherkin.pretty.Element.DOC_STRING;
-import static io.cucumber.gherkin.pretty.Element.EXAMPLES;
-import static io.cucumber.gherkin.pretty.Element.EXAMPLES_TABLE_ROW;
-import static io.cucumber.gherkin.pretty.Element.FEATURE;
-import static io.cucumber.gherkin.pretty.Element.LANGUAGE;
-import static io.cucumber.gherkin.pretty.Element.RULE;
-import static io.cucumber.gherkin.pretty.Element.SCENARIO;
-import static io.cucumber.gherkin.pretty.Element.STEP;
-import static io.cucumber.gherkin.pretty.Element.TAGS;
-import static io.cucumber.gherkin.pretty.Margin.BEFORE;
-import static io.cucumber.gherkin.pretty.Margin.BOTH;
-import static io.cucumber.gherkin.pretty.Margin.NONE;
+import static io.cucumber.gherkin.pretty.Pretty.Element.BACKGROUND;
+import static io.cucumber.gherkin.pretty.Pretty.Element.COMMENTS;
+import static io.cucumber.gherkin.pretty.Pretty.Element.DATA_TABLE;
+import static io.cucumber.gherkin.pretty.Pretty.Element.DATA_TABLE_ROW;
+import static io.cucumber.gherkin.pretty.Pretty.Element.DESCRIPTION;
+import static io.cucumber.gherkin.pretty.Pretty.Element.DETACHED_COMMENTS;
+import static io.cucumber.gherkin.pretty.Pretty.Element.DOCUMENT;
+import static io.cucumber.gherkin.pretty.Pretty.Element.DOC_STRING;
+import static io.cucumber.gherkin.pretty.Pretty.Element.EXAMPLES;
+import static io.cucumber.gherkin.pretty.Pretty.Element.EXAMPLES_TABLE_ROW;
+import static io.cucumber.gherkin.pretty.Pretty.Element.FEATURE;
+import static io.cucumber.gherkin.pretty.Pretty.Element.LANGUAGE;
+import static io.cucumber.gherkin.pretty.Pretty.Element.RULE;
+import static io.cucumber.gherkin.pretty.Pretty.Element.SCENARIO;
+import static io.cucumber.gherkin.pretty.Pretty.Element.STEP;
+import static io.cucumber.gherkin.pretty.Pretty.Element.TAGS;
+import static io.cucumber.gherkin.pretty.Pretty.Margin.BEFORE;
+import static io.cucumber.gherkin.pretty.Pretty.Margin.BOTH;
+import static io.cucumber.gherkin.pretty.Pretty.Margin.NONE;
+import static java.util.stream.Collectors.joining;
 
 final class PrettyHandler implements Handler<Context, PrintWriter> {
 
@@ -277,14 +278,34 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
 
     @Override
     public void handleTags(Context context, List<Tag> tags) {
-        // TODO: Add option to put each tag on a single line
-        // TODO: Add option to sort tags
-        context.writeLine(tags.stream().map(Tag::getName).collect(Collectors.joining(" ")));
+        switch (configuration.tagLayout()) {
+            case AS_IS -> context.writeLine(createTagLine(tags));
+            case ONE_PER_LINE, ONE_LINE -> { /* no-op */ }
+        }
     }
 
     @Override
     public void finishTags(Context context, List<Tag> tags) {
+        switch (configuration.tagLayout()) {
+            case AS_IS -> { /* no-op */ }
+            case ONE_PER_LINE -> writeTagsTo(tags, context::writeLine);
+            case ONE_LINE -> context.writeLine(createTagLine(tags));
+        }
         context.insertMarginAfter(TAGS);
+    }
+
+    private String createTagLine(List<Tag> tags) {
+        return switch (configuration.tagOrder()) {
+            case USER_DEFINED_ORDER -> tags.stream().map(Tag::getName).collect(joining(" "));
+            case SORTED -> tags.stream().map(Tag::getName).sorted().collect(joining(" "));
+        };
+    }
+
+    private void writeTagsTo(List<Tag> tags, Consumer<String> writer) {
+        switch (configuration.tagOrder()) {
+            case USER_DEFINED_ORDER -> tags.stream().map(Tag::getName).forEach(writer);
+            case SORTED -> tags.stream().map(Tag::getName).sorted().forEach(writer);
+        }
     }
 
     @Override
@@ -362,14 +383,14 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
             consecutiveNewLinesWritten = 0;
         }
 
-        void insertMarginBefore(Element element) {
+        void insertMarginBefore(Pretty.Element element) {
             var mode = configuration.margin().getOrDefault(element, NONE);
             if (mode == BEFORE || mode == BOTH) {
                 ensureEmptyLine();
             }
         }
 
-        void insertMarginAfter(Element element) {
+        void insertMarginAfter(Pretty.Element element) {
             var mode = configuration.margin().getOrDefault(element, NONE);
             if (mode == BEFORE || mode == BOTH) {
                 enqueueEmptyLine();

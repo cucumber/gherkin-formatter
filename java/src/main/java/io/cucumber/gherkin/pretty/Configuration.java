@@ -1,26 +1,35 @@
 package io.cucumber.gherkin.pretty;
 
+import io.cucumber.gherkin.pretty.Pretty.Element;
+import io.cucumber.gherkin.pretty.Pretty.Margin;
+import io.cucumber.gherkin.pretty.Pretty.TagLayout;
+import io.cucumber.gherkin.pretty.Pretty.TagOrder;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static io.cucumber.gherkin.pretty.Pretty.Margin.BEFORE;
+import static io.cucumber.gherkin.pretty.Pretty.Margin.BOTH;
+
 record Configuration(
         String indentation,
         Map<Element, Margin> margin,
-        @Nullable Pattern tableRightAlignedValuesPattern
+        @Nullable Pattern tableRightAlignedValuesPattern,
+        TagLayout tagLayout,
+        TagOrder tagOrder
 ) {
 
     static final String DEFAULT_INDENTATION = "  ";
 
     static final Map<Element, Margin> DEFAULT_MARGINS = Map.of(
-            Element.FEATURE, Margin.BEFORE,
-            Element.DESCRIPTION, Margin.BOTH,
-            Element.RULE, Margin.BOTH,
-            Element.BACKGROUND, Margin.BEFORE,
-            Element.SCENARIO, Margin.BEFORE,
-            Element.EXAMPLES, Margin.BEFORE,
-            Element.DETACHED_COMMENTS, Margin.BOTH
+            Element.FEATURE, BEFORE,
+            Element.DESCRIPTION, BOTH,
+            Element.RULE, BOTH,
+            Element.BACKGROUND, BEFORE,
+            Element.SCENARIO, BEFORE,
+            Element.EXAMPLES, BEFORE,
+            Element.DETACHED_COMMENTS, BOTH
     );
 
     /**
@@ -34,5 +43,7 @@ record Configuration(
                     // Exponent
                     "(?:E[-+]?\\d+)?");
 
+    static final TagLayout DEFAULT_TAG_STYLE = TagLayout.AS_IS;
+    static final TagOrder DEFAULT_TAG_ORDER = TagOrder.USER_DEFINED_ORDER;
 
 }

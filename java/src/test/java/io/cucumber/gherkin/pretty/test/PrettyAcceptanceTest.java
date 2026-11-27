@@ -1,8 +1,9 @@
 package io.cucumber.gherkin.pretty.test;
 
-import io.cucumber.gherkin.pretty.Element;
-import io.cucumber.gherkin.pretty.Margin;
 import io.cucumber.gherkin.pretty.Pretty;
+import io.cucumber.gherkin.pretty.Pretty.Margin;
+import io.cucumber.gherkin.pretty.Pretty.TagLayout;
+import io.cucumber.gherkin.pretty.Pretty.TagOrder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -35,10 +36,16 @@ class PrettyAcceptanceTest {
             pretties.put("both-margins", setMargins(Pretty.builder(), Margin.BOTH).build());
             pretties.put("swap-alignment", Pretty.builder().tableRightAlignedValuesPattern(Pattern.compile("[a-z]+")).build());
             pretties.put("no-alignment", Pretty.builder().tableRightAlignedValuesPattern(null).build());
+            pretties.put("tags-one-line", Pretty.builder().tagStyle(TagLayout.ONE_LINE).build());
+            pretties.put("tags-one-per-line", Pretty.builder().tagStyle(TagLayout.ONE_PER_LINE).build());
+            pretties.put("tags-sorted", Pretty.builder().tagOrder(TagOrder.SORTED).build());
+            pretties.put("tags-sorted-one-line", Pretty.builder().tagOrder(TagOrder.SORTED).tagStyle(TagLayout.ONE_LINE).build());
+            pretties.put("tags-sorted-one-per-line", Pretty.builder().tagOrder(TagOrder.SORTED).tagStyle(TagLayout.ONE_PER_LINE).build());
 
             var paths = List.of(
                     Path.of("../testdata/compatibility-kit/src/minimal.feature"),
-                    Path.of("../testdata/compatibility-kit/src/examples-tables.feature")
+                    Path.of("../testdata/compatibility-kit/src/examples-tables.feature"),
+                    Path.of("../testdata/configuration/src/tags.feature")
             );
 
             var expectedDirectory = Path.of("../testdata/configuration/expected");
@@ -53,8 +60,8 @@ class PrettyAcceptanceTest {
         }
 
         private static Pretty.Builder setMargins(Pretty.Builder builder, Margin none) {
-            for (Element value : Element.values()) {
-                builder.margin(value, none);
+            for (Pretty.Element value : Pretty.Element.values()) {
+                builder.margins(value, none);
             }
             return builder;
         }

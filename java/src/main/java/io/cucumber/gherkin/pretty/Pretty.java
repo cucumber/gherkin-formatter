@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_INDENTATION;
 import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_MARGINS;
 import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_TABLE_RIGHT_ALIGNED_VALUES_PATTERN;
+import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_TAG_ORDER;
+import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_TAG_STYLE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
@@ -56,6 +58,8 @@ public final class Pretty {
         private final Map<Element, Margin> margins = new EnumMap<>(DEFAULT_MARGINS);
         private String indentation = DEFAULT_INDENTATION;
         private @Nullable Pattern tableRightAlignedValuesPattern = DEFAULT_TABLE_RIGHT_ALIGNED_VALUES_PATTERN;
+        private TagLayout tagLayout = DEFAULT_TAG_STYLE;
+        private TagOrder tagOrder = DEFAULT_TAG_ORDER;
 
         private Builder() {
         }
@@ -80,7 +84,7 @@ public final class Pretty {
          * <p>Note: Comments attached to the element are considered to be
          * contained by the element. Detached comments are not.
          */
-        public Builder margin(Element element, Margin margin) {
+        public Builder margins(Element element, Margin margin) {
             requireNonNull(element);
             requireNonNull(margin);
             margins.put(element, margin);
@@ -96,9 +100,99 @@ public final class Pretty {
             return this;
         }
 
-        public Pretty build() {
-            return new Pretty(new Configuration(indentation, Map.copyOf(margins), tableRightAlignedValuesPattern));
+        /**
+         * Configure the layout of the tags in a Gherkin Document.
+         */
+        public Builder tagStyle(TagLayout tagLayout) {
+            requireNonNull(tagLayout);
+            this.tagLayout = tagLayout;
+            return this;
         }
 
+        /**
+         * Configure the order of the tags in a Gherkin document.
+         */
+        public Builder tagOrder(TagOrder tagOrder) {
+            requireNonNull(tagOrder);
+            this.tagOrder = tagOrder;
+            return this;
+        }
+
+        public Pretty build() {
+            return new Pretty(new Configuration(
+                    indentation,
+                    Map.copyOf(margins),
+                    tableRightAlignedValuesPattern,
+                    tagLayout,
+                    tagOrder
+            ));
+        }
+
+    }
+
+    /**
+     * Configures how tags in a Gherkin document are laid out.
+     */
+    public enum TagLayout {
+        /**
+         * Tags are kept on the line they're defined.
+         *
+         * <p>When used in combination with {@link TagOrder#SORTED}, only tags on
+         * the same line are sorted.
+         */
+        AS_IS,
+
+        /**
+         * Each tag is written on its own line.
+         */
+        ONE_PER_LINE,
+
+        /**
+         * All tags are written on the same line.
+         */
+        ONE_LINE
+    }
+
+    /**
+     * Configures the order in tags in a Gherkin document are laid out.
+     */
+    public enum TagOrder {
+        /**
+         * Tags are kept in order they're found in the Gherkin Document.
+         */
+        USER_DEFINED_ORDER,
+        /**
+         * Tags are sorted lexicographically.
+         *
+         * <p>When used in combination with the default {@link TagLayout#AS_IS},
+         * only tags on the same line are sorted.
+         */
+        SORTED
+    }
+
+    public enum Margin {
+        NONE, BEFORE, AFTER, BOTH
+    }
+
+    /**
+     * Represent an element in a feature file.
+     */
+    public enum Element {
+        DOCUMENT,
+        LANGUAGE,
+        FEATURE,
+        DESCRIPTION,
+        RULE,
+        BACKGROUND,
+        SCENARIO,
+        STEP,
+        DOC_STRING,
+        DATA_TABLE,
+        DATA_TABLE_ROW,
+        EXAMPLES,
+        EXAMPLES_TABLE_ROW,
+        TAGS,
+        COMMENTS,
+        DETACHED_COMMENTS
     }
 }

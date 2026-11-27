@@ -329,7 +329,7 @@ class GherkinDocumentWalkerAcceptanceTest {
                 this.consumer = consumer;
             }
 
-            private void log() {
+            void log() {
                 var caller = new Exception().getStackTrace()[1].getMethodName();
                 if (caller.startsWith("finish")) {
                     depth--;

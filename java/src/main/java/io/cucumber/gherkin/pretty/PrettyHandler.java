@@ -8,6 +8,7 @@ import io.cucumber.messages.types.DataTable;
 import io.cucumber.messages.types.DocString;
 import io.cucumber.messages.types.Examples;
 import io.cucumber.messages.types.Feature;
+import io.cucumber.messages.types.GherkinDocument;
 import io.cucumber.messages.types.Rule;
 import io.cucumber.messages.types.Scenario;
 import io.cucumber.messages.types.Step;
@@ -17,6 +18,26 @@ import io.cucumber.messages.types.Tag;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static io.cucumber.gherkin.pretty.Element.BACKGROUND;
+import static io.cucumber.gherkin.pretty.Element.COMMENTS;
+import static io.cucumber.gherkin.pretty.Element.DATA_TABLE;
+import static io.cucumber.gherkin.pretty.Element.DATA_TABLE_ROW;
+import static io.cucumber.gherkin.pretty.Element.DESCRIPTION;
+import static io.cucumber.gherkin.pretty.Element.DETACHED_COMMENTS;
+import static io.cucumber.gherkin.pretty.Element.DOCUMENT;
+import static io.cucumber.gherkin.pretty.Element.DOC_STRING;
+import static io.cucumber.gherkin.pretty.Element.EXAMPLES;
+import static io.cucumber.gherkin.pretty.Element.EXAMPLES_TABLE_ROW;
+import static io.cucumber.gherkin.pretty.Element.FEATURE;
+import static io.cucumber.gherkin.pretty.Element.LANGUAGE;
+import static io.cucumber.gherkin.pretty.Element.RULE;
+import static io.cucumber.gherkin.pretty.Element.SCENARIO;
+import static io.cucumber.gherkin.pretty.Element.STEP;
+import static io.cucumber.gherkin.pretty.Element.TAGS;
+import static io.cucumber.gherkin.pretty.Margin.BEFORE;
+import static io.cucumber.gherkin.pretty.Margin.BOTH;
+import static io.cucumber.gherkin.pretty.Margin.NONE;
 
 final class PrettyHandler implements Handler<Context, PrintWriter> {
 
@@ -33,9 +54,19 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     }
 
     @Override
+    public void startGherkinDocument(Context context, GherkinDocument gherkinDocument) {
+        context.insertMarginBefore(DOCUMENT);
+    }
+
+    @Override
+    public void finishGherkinDocument(Context context, GherkinDocument gherkinDocument) {
+        context.insertMarginAfter(DOCUMENT);
+    }
+
+    @Override
     public void startFeature(Context context, Feature feature) {
         context.depth++;
-        context.ensureEmptyLine();
+        context.insertMarginBefore(FEATURE);
     }
 
     @Override
@@ -46,6 +77,12 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishFeature(Context context, Feature feature) {
         context.depth--;
+        context.insertMarginAfter(FEATURE);
+    }
+
+    @Override
+    public void startLanguage(Context context, String language) {
+        context.insertMarginBefore(LANGUAGE);
     }
 
     @Override
@@ -57,10 +94,15 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     }
 
     @Override
+    public void finishLanguage(Context context, String language) {
+        context.insertMarginAfter(LANGUAGE);
+    }
+
+
+    @Override
     public void startDescription(Context context, String description) {
         context.depth++;
-        // TODO: Make spacing configurable
-        context.ensureEmptyLine();
+        context.insertMarginBefore(DESCRIPTION);
     }
 
     @Override
@@ -76,13 +118,13 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishDescription(Context context, String description) {
         context.depth--;
-        context.ensureEmptyLine();
+        context.insertMarginAfter(DESCRIPTION);
     }
 
     @Override
     public void startRule(Context context, Rule rule) {
-        context.ensureEmptyLine();
         context.depth++;
+        context.insertMarginBefore(RULE);
     }
 
     @Override
@@ -93,12 +135,13 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishRule(Context context, Rule rule) {
         context.depth--;
+        context.insertMarginAfter(RULE);
     }
 
     @Override
     public void startBackground(Context context, Background background) {
         context.depth++;
-        context.ensureEmptyLine();
+        context.insertMarginBefore(BACKGROUND);
     }
 
     @Override
@@ -109,12 +152,13 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishBackground(Context context, Background background) {
         context.depth--;
+        context.insertMarginAfter(BACKGROUND);
     }
 
     @Override
     public void startScenario(Context context, Scenario scenario) {
         context.depth++;
-        context.ensureEmptyLine();
+        context.insertMarginBefore(SCENARIO);
     }
 
     @Override
@@ -125,11 +169,13 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishScenario(Context context, Scenario scenario) {
         context.depth--;
+        context.insertMarginAfter(SCENARIO);
     }
 
     @Override
     public void startStep(Context context, Step step) {
         context.depth++;
+        context.insertMarginBefore(STEP);
     }
 
     @Override
@@ -140,11 +186,13 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishStep(Context context, Step step) {
         context.depth--;
+        context.insertMarginAfter(STEP);
     }
 
     @Override
     public void startDocString(Context context, DocString docString) {
         context.depth++;
+        context.insertMarginBefore(DOC_STRING);
     }
 
     @Override
@@ -155,18 +203,26 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishDocString(Context context, DocString docString) {
         context.depth--;
+        context.insertMarginAfter(DOC_STRING);
     }
 
     @Override
     public void startDataTable(Context context, DataTable dataTable) {
         context.depth++;
+        context.insertMarginBefore(DATA_TABLE);
         context.tableFormatter.setCurrent(dataTable);
     }
 
     @Override
     public void finishDataTable(Context context, DataTable dataTable) {
         context.depth--;
+        context.insertMarginAfter(DATA_TABLE);
         context.tableFormatter.clearCurrent();
+    }
+
+    @Override
+    public void startDataTableRow(Context context, TableRow tableRow) {
+        context.insertMarginBefore(DATA_TABLE_ROW);
     }
 
     @Override
@@ -175,9 +231,14 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     }
 
     @Override
+    public void finishDataTableRow(Context context, TableRow tableRow) {
+        context.insertMarginAfter(DATA_TABLE_ROW);
+    }
+
+    @Override
     public void startExamples(Context context, Examples examples) {
         context.depth++;
-        context.ensureEmptyLine();
+        context.insertMarginBefore(EXAMPLES);
         context.tableFormatter.setCurrent(examples);
     }
 
@@ -189,12 +250,14 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishExamples(Context context, Examples examples) {
         context.depth--;
+        context.insertMarginAfter(EXAMPLES);
         context.tableFormatter.clearCurrent();
     }
 
     @Override
     public void startExamplesTableRow(Context context, TableRow tableRow) {
         context.depth++;
+        context.insertMarginBefore(EXAMPLES_TABLE_ROW);
     }
 
     @Override
@@ -205,6 +268,12 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishExamplesTableRow(Context context, TableRow tableRow) {
         context.depth--;
+        context.insertMarginAfter(EXAMPLES_TABLE_ROW);
+    }
+
+    @Override
+    public void startTags(Context context, List<Tag> tags) {
+        context.insertMarginBefore(TAGS);
     }
 
     @Override
@@ -215,14 +284,29 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     }
 
     @Override
+    public void finishTags(Context context, List<Tag> tags) {
+        context.insertMarginAfter(TAGS);
+    }
+
+    @Override
+    public void startComments(Context context, List<Comment> comments) {
+        context.insertMarginBefore(COMMENTS);
+    }
+
+    @Override
     public void handleComments(Context context, List<Comment> comments) {
         context.commentFormatter.formatCommentBlockTo(comments, context::writeLine);
     }
 
     @Override
+    public void finishComments(Context context, List<Comment> comments) {
+        context.insertMarginAfter(COMMENTS);
+    }
+
+    @Override
     public void startDetachedComments(Context context, List<Comment> comments) {
         context.depth++;
-        context.ensureEmptyLine();
+        context.insertMarginBefore(DETACHED_COMMENTS);
     }
 
     @Override
@@ -233,10 +317,8 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
     @Override
     public void finishDetachedComment(Context context, List<Comment> comments) {
         context.depth--;
-        context.enqueueEmptyLine();
+        context.insertMarginAfter(DETACHED_COMMENTS);
     }
-
-
 
     private static String formatTitle(String keyword, String name) {
         if (name.isEmpty()) {
@@ -265,7 +347,7 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
             this.writer = writer;
         }
 
-        private void writeLine(String line) {
+        void writeLine(String line) {
             if (line.isBlank()) {
                 writeLine();
                 return;
@@ -279,6 +361,20 @@ final class PrettyHandler implements Handler<Context, PrintWriter> {
             writer.append(line);
             writeLine();
             consecutiveNewLinesWritten = 0;
+        }
+
+        void insertMarginBefore(Element element) {
+            var mode = configuration.margin().getOrDefault(element, NONE);
+            if (mode == BEFORE || mode == BOTH) {
+                ensureEmptyLine();
+            }
+        }
+
+        void insertMarginAfter(Element element) {
+            var mode = configuration.margin().getOrDefault(element, NONE);
+            if (mode == BEFORE || mode == BOTH) {
+                enqueueEmptyLine();
+            }
         }
 
         private void ensureEmptyLine() {

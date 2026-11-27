@@ -6,7 +6,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.EnumMap;
+import java.util.Map;
 
+import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_INDENTATION;
+import static io.cucumber.gherkin.pretty.Configuration.DEFAULT_MARGINS;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
@@ -46,7 +50,8 @@ public final class Pretty {
 
     public static final class Builder {
 
-        private String indentation = "  ";
+        private final Map<Element, Margin> margins = new EnumMap<>(DEFAULT_MARGINS);
+        private String indentation = DEFAULT_INDENTATION;
 
         private Builder() {
         }
@@ -65,8 +70,21 @@ public final class Pretty {
             return this;
         }
 
+        /**
+         * Configure the margins around an element.
+         *
+         * <p>Note: Comments attached to the element are considered to be
+         * contained by the element. Detached comments are not.
+         */
+        public Builder margin(Element element, Margin margin) {
+            requireNonNull(element);
+            requireNonNull(margin);
+            margins.put(element, margin);
+            return this;
+        }
+
         public Pretty build() {
-            return new Pretty(new Configuration(indentation));
+            return new Pretty(new Configuration(indentation, Map.copyOf(margins)));
         }
 
     }

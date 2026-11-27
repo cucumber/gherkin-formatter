@@ -59,6 +59,9 @@ In the default formatting:
  * The feature keyword is surrounded by empty lines.
  * The rule keyword is surrounded by empty lines.
  * Descriptions are surrounded by empty lines.
+ * The background keyword is preceded by an empty line. 
+ * The scenario keyword is preceded by an empty line. 
+ * The examples keyword is preceded by an empty line. 
  * Blank lines are converted to empty lines.
  * Consecutive empty lines are collapsed into a single empty line.
  * EOF is preceded by a new line.

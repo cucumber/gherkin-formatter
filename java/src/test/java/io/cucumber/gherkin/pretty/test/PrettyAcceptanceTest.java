@@ -1,5 +1,7 @@
 package io.cucumber.gherkin.pretty.test;
 
+import io.cucumber.gherkin.pretty.Element;
+import io.cucumber.gherkin.pretty.Margin;
 import io.cucumber.gherkin.pretty.Pretty;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
@@ -28,10 +30,12 @@ class PrettyAcceptanceTest {
 
             var pretties = new LinkedHashMap<String, Pretty>();
             pretties.put("tab-indentation", Pretty.builder().indentation("\t").build());
-
+            pretties.put("none-margins", setMargins(Pretty.builder(), Margin.NONE).build());
+            pretties.put("both-margins", setMargins(Pretty.builder(), Margin.BOTH).build());
 
             var paths = List.of(
-                    Path.of("../testdata/compatibility-kit/src/minimal.feature")
+                    Path.of("../testdata/compatibility-kit/src/minimal.feature"),
+                    Path.of("../testdata/compatibility-kit/src/examples-tables.feature")
             );
 
             var expectedDirectory = Path.of("../testdata/configuration/expected");
@@ -43,6 +47,13 @@ class PrettyAcceptanceTest {
             });
 
             return testCases;
+        }
+
+        private static Pretty.Builder setMargins(Pretty.Builder builder, Margin none) {
+            for (Element value : Element.values()) {
+                builder.margin(value, none);
+            }
+            return builder;
         }
 
         @ParameterizedTest

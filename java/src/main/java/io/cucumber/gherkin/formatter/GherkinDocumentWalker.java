@@ -85,6 +85,10 @@ public final class GherkinDocumentWalker<Context, Consumer> {
     }
 
     private void walkDescription(Context context, String description) {
+        // Descriptions are empty when not provided
+        if (description.isEmpty()) {
+            return;
+        }
         handler.startDescription(context, description);
         handler.handleDescription(context, description);
         handler.finishDescription(context, description);

@@ -45,7 +45,7 @@ class GherkinDocumentFormatterAcceptanceTest {
             var paths = List.of(
                     Path.of("../testdata/compatibility-kit/src/minimal.feature"),
                     Path.of("../testdata/compatibility-kit/src/examples-tables.feature"),
-                    Path.of("../testdata/configuration/src/tags.feature")
+                    Path.of("../testdata/gherkin-formatter/src/tags.feature")
             );
 
             var expectedDirectory = Path.of("../testdata/configuration/expected");

@@ -25,6 +25,13 @@ Given a step
 #        
 ##
 
+# A comment on this this tag
+
+@A
+
+# A comment on this this tag
+
+@B
 Scenario: A scenario
 
 ##

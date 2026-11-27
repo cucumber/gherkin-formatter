@@ -25,6 +25,11 @@ Feature: With leading comments
   #
   ##
 
+  # A comment on this this tag
+
+  @A
+  # A comment on this this tag
+  @B
   Scenario: A scenario
 
     ##

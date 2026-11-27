@@ -16,6 +16,7 @@ import io.cucumber.messages.types.TableRow;
 import io.cucumber.messages.types.Tag;
 
 import java.io.PrintWriter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -38,7 +39,9 @@ import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Element.TAG
 import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin.BEFORE;
 import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin.BOTH;
 import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.Margin.NONE;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Pretty formats Gherkin Documents.
@@ -288,7 +291,11 @@ final class Pretty implements Handler<Context, PrintWriter> {
     @Override
     public void handleTags(Context context, List<Tag> tags) {
         switch (configuration.tagLayout()) {
-            case AS_IS -> context.writeLine(createTagLine(tags));
+            case AS_IS -> tags.stream() //
+                    .collect(groupingBy(tag -> tag.getLocation().getLine(), LinkedHashMap::new, toList())) //
+                    .forEach((__, tagsOnTheSameLine) -> {
+                        context.writeLine(createTagLine(tagsOnTheSameLine));
+                    });
             case ONE_PER_LINE, ONE_LINE -> { /* no-op */ }
         }
     }

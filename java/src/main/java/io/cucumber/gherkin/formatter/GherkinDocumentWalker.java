@@ -16,12 +16,11 @@ import io.cucumber.messages.types.Step;
 import io.cucumber.messages.types.TableRow;
 import io.cucumber.messages.types.Tag;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 
-import static io.cucumber.gherkin.formatter.CommentBlock.groupByCommentBlock;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.CommentBlock;
+import static io.cucumber.gherkin.formatter.GherkinDocumentFormatter.CommentBlock.groupByCommentBlock;
+import static io.cucumber.gherkin.formatter.GherkinDocumentUtil.groupByBlock;
 
 /**
  * Utility to walk a Gherkin document.
@@ -243,13 +242,12 @@ public final class GherkinDocumentWalker<Context, Consumer> {
         if (tags.isEmpty()) {
             return;
         }
+        walkDetachedCommentsUpTo(context, remainingComments, tags.get(0).getLocation());
         handler.startTags(context, tags);
-        var tagsByLocation = tags.stream() //
-                .collect(groupingBy(tag -> tag.getLocation().getLine(), LinkedHashMap::new, toList()));
-        tagsByLocation.forEach((integer, tagOnSameLine) -> {
-            var location = tagOnSameLine.get(0).getLocation();
+        groupByBlock(tags, Tag::getLocation).forEach(block -> {
+            var location = block.get(0).getLocation();
             walkCommentsUpto(context, remainingComments, location);
-            handler.handleTags(context, tagOnSameLine);
+            handler.handleTags(context, block);
         });
         handler.finishTags(context, tags);
     }
@@ -281,7 +279,7 @@ public final class GherkinDocumentWalker<Context, Consumer> {
         var iterator = remainingComments.iterator();
         while (iterator.hasNext()) {
             var commentBlock = iterator.next();
-            if (commentBlock.end().getLine() < upToLine) {
+            if (commentBlock.finish().getLine() < upToLine) {
                 iterator.remove();
                 walkDetachedComment(context, commentBlock);
             } else {

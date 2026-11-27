@@ -6,6 +6,10 @@ Feature: With leading comments
     # A comment on this step line
     Given a step
 
+  # A comment on this this tag
+  @A
+  # A comment on this this tag
+  @B
   # A comment on this scenario line
   Scenario: A scenario
     # A comment on this step line
